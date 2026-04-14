@@ -253,3 +253,43 @@ For issues and feature requests, please open a GitHub Issue.
 ---
 
 Built with passion for personal injury law firms. Let's make case management fun and efficient!
+
+---
+
+## Deploy Setup (canonical)
+
+### Required environment variables
+
+Set these in `.env.local` for local dev and in the Vercel project settings for prod.
+
+| Variable | Where it's used |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | browser + server Supabase clients, middleware |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server Supabase clients, middleware |
+| `SUPABASE_SERVICE_ROLE_KEY` | reserved for server-only admin operations; never expose to the client |
+
+### Supabase setup
+
+1. Create a new Supabase project and copy the URL + anon key into `.env.local`.
+2. In the SQL editor, run `supabase/schema.sql` (tables, enums, indexes, baseline RLS).
+3. Then run `supabase/migrations/20260413000000_rls_policies.sql` (updated RLS policies for admin / case_manager / self access, plus the `IF-######` case-number default).
+4. Create your first admin user:
+   - In Supabase Auth → **Add user** with an email + password.
+   - Copy the `auth.users.id` UUID.
+   - In SQL editor: `INSERT INTO public.users (id, email, full_name, role) VALUES ('<uuid>', '<email>', 'Admin', 'admin');`
+5. Sign in at `/login` with those credentials.
+
+### Auth flow
+
+- Login: `/login` calls `supabase.auth.signInWithPassword` (email + password).
+- Session refresh: root `middleware.ts` runs `supabase.auth.getUser()` on every request and redirects unauthenticated traffic to `/login` (excluding `/login`, `/api/auth`, `/_next`, and static assets).
+- Logout: `POST` (or `GET`) to `/api/auth/logout`.
+
+### Intake flow
+
+`POST` from the `/intake` page fires a server action (`src/app/(dashboard)/intake/actions.ts`) that:
+
+1. Inserts a row into `public.cases` using the server Supabase client.
+2. Reads back the DB-generated `case_number` (`IF-NNNNNN` from `cases_case_number_seq`).
+3. Assigns the case manager with the fewest active (non-`srl`) cases.
+

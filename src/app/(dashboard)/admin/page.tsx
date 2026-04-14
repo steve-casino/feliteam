@@ -21,7 +21,6 @@ import Card from '@/components/ui/Card'
 import Avatar from '@/components/ui/Avatar'
 import Modal from '@/components/ui/Modal'
 import { mockCases, mockUsers } from '@/lib/mock-data'
-import { useTranslation } from '@/hooks/useLanguage'
 
 const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
   const getRoleColor = (r: string) => {
@@ -75,7 +74,6 @@ interface ManagerStats {
 }
 
 const AdminPage: React.FC = () => {
-  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<AdminTab>('analytics')
   const [users, setUsers] = useState<AdminUser[]>(
     mockUsers.map((u) => ({ ...u, active: true }))

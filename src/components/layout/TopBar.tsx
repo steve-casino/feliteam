@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { Menu, X, Bell, ChevronRight } from 'lucide-react'
 import SearchInput from '@/components/ui/SearchInput'
-import LanguageToggle from '@/components/ui/LanguageToggle'
 
 interface TopBarProps {
   title: string
@@ -56,11 +55,6 @@ const TopBar: React.FC<TopBarProps> = ({
             onSearchChange={setSearchQuery}
             className="w-56"
           />
-        </div>
-
-        {/* Language Toggle - Desktop Only */}
-        <div className="hidden sm:block">
-          <LanguageToggle />
         </div>
 
         {/* Notification Bell */}

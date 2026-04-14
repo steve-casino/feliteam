@@ -9,7 +9,6 @@ import XPDisplay from '@/components/ui/XPDisplay'
 import Badge from '@/components/ui/Badge'
 import Avatar from '@/components/ui/Avatar'
 import { mockCases, mockUsers, mockChecklistItems } from '@/lib/mock-data'
-import { useTranslation } from '@/hooks/useLanguage'
 
 interface QuickActionModal {
   type: 'call' | 'text' | 'stage' | 'note' | null
@@ -50,7 +49,6 @@ const messageTemplates = [
 ]
 
 const DashboardPage: React.FC = () => {
-  const { t, language } = useTranslation()
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
   const [expandedTemplates, setExpandedTemplates] = useState<Set<string>>(new Set())
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null)
@@ -343,7 +341,7 @@ const DashboardPage: React.FC = () => {
         {showTemplates && (
           <div className="grid gap-4 md:grid-cols-2">
             {messageTemplates.map((template) => {
-              const content = language === 'en' ? template.en : template.es
+              const content = template.en
               const isExpanded = expandedTemplates.has(template.id)
 
               return (

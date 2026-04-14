@@ -36,22 +36,22 @@ const navItems = [
   },
   {
     label: 'Cases',
-    href: '/dashboard/cases',
+    href: '/cases',
     icon: Briefcase
   },
   {
     label: 'Intake',
-    href: '/dashboard/intake',
+    href: '/intake',
     icon: UserPlus
   },
   {
     label: 'Team',
-    href: '/dashboard/team',
+    href: '/team',
     icon: Users
   },
   {
     label: 'Leaderboard',
-    href: '/dashboard/leaderboard',
+    href: '/leaderboard',
     icon: Trophy
   }
 ]
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
   const adminItems = [
     {
       label: 'Admin',
-      href: '/dashboard/admin',
+      href: '/admin',
       icon: Settings
     }
   ]

@@ -260,36 +260,92 @@ Built with passion for personal injury law firms. Let's make case management fun
 
 ### Required environment variables
 
-Set these in `.env.local` for local dev and in the Vercel project settings for prod.
+Set these in `.env.local` for local dev and in Vercel → Settings → Environment Variables (Production + Preview + Development):
 
-| Variable | Where it's used |
+| Variable | Used by |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | browser + server Supabase clients, middleware |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server Supabase clients, middleware |
-| `SUPABASE_SERVICE_ROLE_KEY` | reserved for server-only admin operations; never expose to the client |
+| `SUPABASE_SERVICE_ROLE_KEY` | server-only admin client (`src/lib/supabase/admin.ts`) — never ship to browser |
 
 ### Supabase setup
 
-1. Create a new Supabase project and copy the URL + anon key into `.env.local`.
-2. In the SQL editor, run `supabase/schema.sql` (tables, enums, indexes, baseline RLS).
-3. Then run `supabase/migrations/20260413000000_rls_policies.sql` (updated RLS policies for admin / case_manager / self access, plus the `IF-######` case-number default).
-4. Create your first admin user:
-   - In Supabase Auth → **Add user** with an email + password.
-   - Copy the `auth.users.id` UUID.
-   - In SQL editor: `INSERT INTO public.users (id, email, full_name, role) VALUES ('<uuid>', '<email>', 'Admin', 'admin');`
-5. Sign in at `/login` with those credentials.
+Using the Supabase CLI:
 
-### Auth flow
+```bash
+supabase link --project-ref <project-ref>
+supabase db push            # runs everything in supabase/migrations/ in order
+```
 
-- Login: `/login` calls `supabase.auth.signInWithPassword` (email + password).
-- Session refresh: root `middleware.ts` runs `supabase.auth.getUser()` on every request and redirects unauthenticated traffic to `/login` (excluding `/login`, `/api/auth`, `/_next`, and static assets).
-- Logout: `POST` (or `GET`) to `/api/auth/logout`.
+Or paste each migration into the SQL editor in order:
 
-### Intake flow
+1. `supabase/migrations/20260101000000_initial_schema.sql` — tables, enums, indexes, baseline RLS.
+2. `supabase/migrations/20260413000000_rls_policies.sql` — per-role RLS (self / case_manager / admin), service-role helper, `cases_case_number_seq` with `IF-######` default.
+3. `supabase/migrations/20260413100000_handle_new_user.sql` — `auth.users` → `public.users` trigger that auto-provisions a profile row on signup (defaults to `intake_agent`, honors `raw_user_meta_data.role` and `full_name`).
 
-`POST` from the `/intake` page fires a server action (`src/app/(dashboard)/intake/actions.ts`) that:
+Sample data (optional): `supabase/seed.sql`.
 
-1. Inserts a row into `public.cases` using the server Supabase client.
-2. Reads back the DB-generated `case_number` (`IF-NNNNNN` from `cases_case_number_seq`).
-3. Assigns the case manager with the fewest active (non-`srl`) cases.
+### Supabase Auth URL settings
+
+In Supabase Dashboard → Authentication → URL Configuration:
+
+- **Site URL**: your deployed origin (e.g., `https://injuryflow.vercel.app`) or `http://localhost:3000` for local.
+- **Redirect URLs**: add both the Vercel production URL and `http://localhost:3000` for local development.
+
+### First admin user
+
+This app does **not** expose public signup. New users are provisioned one of two ways:
+
+**A. Admin dashboard.** Any existing admin can create users at `/admin` (uses the service-role key server-side via `createAdminClient`).
+
+**B. Bootstrap the first admin.** Since `/admin` itself requires an admin, seed one:
+
+```sql
+-- In Supabase SQL editor, after running all migrations:
+-- 1. Create the auth user via Dashboard → Auth → Add user (email + password).
+-- 2. Promote it to admin:
+update public.users
+set role = 'admin', full_name = 'Your Name'
+where email = 'you@example.com';
+```
+
+The `handle_new_user` trigger already inserts the `public.users` row on auth signup, so you only need the `update` — no manual insert.
+
+### Local development
+
+```bash
+npm install
+cp .env.example .env.local     # fill in your Supabase project values
+npm run dev                    # http://localhost:3000
+```
+
+### Vercel deploy
+
+1. Import the repo at [vercel.com/new](https://vercel.com/new).
+2. Add the three env vars above to **Production**, **Preview**, and **Development** scopes.
+3. Deploy. The root `middleware.ts` refreshes the Supabase session cookie on every request and redirects unauthenticated traffic to `/login`.
+4. Every push to `main` triggers a new production deploy.
+
+### Auth flow summary
+
+- Login: `/login` → `supabase.auth.signInWithPassword`, redirects to `next` param or `/dashboard`.
+- Session: refreshed per-request by `middleware.ts`; server components read via `src/lib/supabase/server.ts` (`await cookies()` → `createServerClient`).
+- Logout: `POST`/`GET /api/auth/logout`, or the **Sign out** button on `/settings`.
+
+### Intake flow summary
+
+`/intake` fires the `createCase` server action (`src/app/(dashboard)/intake/actions.ts`):
+
+1. Inserts into `public.cases` with flags (`is_minor`, `has_insurance_warning`) computed server-side.
+2. DB returns the auto-generated `case_number` (`IF-NNNNNN` from `cases_case_number_seq`).
+3. Case manager with fewest non-`srl` cases is auto-assigned.
+
+### Case management
+
+- `/cases` lists cases visible to the current user (RLS-enforced).
+- `/cases/[id]` wires **Add note**, **Change stage** (inserts a `stage_change` note automatically), and **Toggle urgent** via server actions.
+- `/team` posts, reactions, and deletions hit `team_posts` via server actions.
+- `/leaderboard` ranks `public.users` by `xp_points`.
+- `/admin` creates/promotes/deactivates users via the service-role admin client.
+- `/settings` updates profile (`public.users`), changes password (`auth.updateUser`), or signs out.
 

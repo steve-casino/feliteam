@@ -9,12 +9,19 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/dashboard'
+  const errorParam = searchParams.get('error')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    errorParam === 'config'
+      ? 'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY on the host, then redeploy.'
+      : errorParam === 'session'
+        ? 'Session check failed. Please sign in again.'
+        : null
+  )
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

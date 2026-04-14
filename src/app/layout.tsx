@@ -13,8 +13,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InjuryFlow | Law Firm Operations Platform",
-  description: "InjuryFlow - Your PI Firm, Gamified.",
+  title: {
+    default: "InjuryFlow — Law Firm Operations Platform",
+    template: "%s · InjuryFlow",
+  },
+  description:
+    "Case intake, treatment tracking, and team collaboration for personal injury law firms.",
+  openGraph: {
+    title: "InjuryFlow — Law Firm Operations Platform",
+    description:
+      "Case intake, treatment tracking, and team collaboration for personal injury law firms.",
+    type: "website",
+    siteName: "InjuryFlow",
+  },
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({

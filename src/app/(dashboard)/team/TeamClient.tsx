@@ -1,13 +1,14 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 import { Send } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Avatar from '@/components/ui/Avatar'
 import Modal from '@/components/ui/Modal'
-import { mockTeamPosts } from '@/lib/mock-data'
-import type { User } from '@/types'
+import type { TeamPost, User } from '@/types'
+import { createPost, toggleReaction } from './actions'
 
 type TabType = 'feed' | 'shoutouts' | 'huddles'
 type PostType = 'announcement' | 'celebration' | 'shoutout' | 'poll'
@@ -48,12 +49,16 @@ interface Poll {
 
 interface TeamPageProps {
   users: User[]
+  posts: TeamPost[]
+  currentUserId: string
 }
 
-const TeamPage: React.FC<TeamPageProps> = ({ users }) => {
+const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, currentUserId }) => {
+  const router = useRouter()
   const mockUsers = users
+  const [, startTransition] = useTransition()
   const [activeTab, setActiveTab] = useState<TabType>('feed')
-  const [posts, setPosts] = useState<UIPost[]>(mockTeamPosts)
+  const [posts, setPosts] = useState<UIPost[]>(initialPosts as UIPost[])
   const [shoutouts, setShoutouts] = useState<UIShoutout[]>([
     {
       id: 'shoutout-1',
@@ -109,39 +114,32 @@ const TeamPage: React.FC<TeamPageProps> = ({ users }) => {
 
   const handlePostSubmit = () => {
     if (!postContent.trim()) return
-
-    const newPost: UIPost = {
-      id: `post-${Date.now()}`,
-      user_id: 'user-1',
-      content: postContent,
-      type: postType,
-      reactions: {},
-      created_at: new Date().toISOString()
-    }
-
-    setPosts([newPost, ...posts])
+    const content = postContent
+    const type = postType
     setPostContent('')
     setPostType('announcement')
+    startTransition(async () => {
+      const result = await createPost(content, type)
+      if (result.ok) router.refresh()
+    })
   }
 
-  const handleReaction = (postId: string, emoji: string, userId: string = 'user-1') => {
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId) {
-          const reactions = { ...post.reactions }
-          if (!reactions[emoji]) {
-            reactions[emoji] = []
-          }
-          if (!reactions[emoji].includes(userId)) {
-            reactions[emoji] = [...reactions[emoji], userId]
-          } else {
-            reactions[emoji] = reactions[emoji].filter((id) => id !== userId)
-          }
-          return { ...post, reactions }
-        }
-        return post
+  const handleReaction = (postId: string, emoji: string) => {
+    const userId = currentUserId
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post
+        const reactions = { ...post.reactions }
+        const list = reactions[emoji] ?? []
+        reactions[emoji] = list.includes(userId)
+          ? list.filter((id) => id !== userId)
+          : [...list, userId]
+        return { ...post, reactions }
       })
     )
+    startTransition(async () => {
+      await toggleReaction(postId, emoji)
+    })
   }
 
   const handleShoutout = () => {
@@ -340,7 +338,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users }) => {
 
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
                     {reactionEmojis.map((emoji) => {
-                      const hasReacted = post.reactions[emoji]?.includes('user-1')
+                      const hasReacted = post.reactions[emoji]?.includes(currentUserId)
                       const count = post.reactions[emoji]?.length || 0
 
                       return (

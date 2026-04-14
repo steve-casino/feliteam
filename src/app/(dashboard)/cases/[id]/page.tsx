@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getContext } from '@/lib/supabase/testing'
 import CaseDetailView from './CaseDetailView'
 import type { Case, CaseNote, User } from '@/types'
 
@@ -8,16 +8,16 @@ interface PageProps {
 
 export default async function CaseDetailPage({ params }: PageProps) {
   const { id } = await params
-  const supabase = await createClient()
+  const { db } = await getContext()
 
   const [{ data: caseObj }, { data: notes }, { data: users }] = await Promise.all([
-    supabase.from('cases').select('*').eq('id', id).maybeSingle(),
-    supabase
+    db.from('cases').select('*').eq('id', id).maybeSingle(),
+    db
       .from('case_notes')
       .select('*')
       .eq('case_id', id)
       .order('created_at', { ascending: false }),
-    supabase.from('users').select('*'),
+    db.from('users').select('*'),
   ])
 
   return (

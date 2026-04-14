@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { getContext } from '@/lib/supabase/testing'
 import type { TeamPostType } from '@/types'
 
 export interface ActionResult {
@@ -13,21 +13,19 @@ export async function createPost(
   content: string,
   type: TeamPostType
 ): Promise<ActionResult> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Not authenticated' }
-
   const trimmed = content.trim()
   if (!trimmed) return { ok: false, error: 'Content required' }
 
-  const { error } = await supabase.from('team_posts').insert({
-    user_id: user.id,
-    content: trimmed,
-    type,
-    reactions: {},
-  })
+  const { userId, db } = await getContext()
+
+  const { error } = await db.from('team_posts').insert([
+    {
+      user_id: userId,
+      content: trimmed,
+      type,
+      reactions: {},
+    },
+  ] as never)
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/team')
@@ -38,29 +36,26 @@ export async function toggleReaction(
   postId: string,
   emoji: string
 ): Promise<ActionResult> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Not authenticated' }
+  const { userId, db } = await getContext()
 
-  const { data: post } = await supabase
+  const { data: post } = await db
     .from('team_posts')
     .select('reactions')
     .eq('id', postId)
     .maybeSingle()
 
-  const reactions: Record<string, string[]> = {
-    ...(post?.reactions as Record<string, string[]> | null ?? {}),
-  }
+  const existing =
+    (post as { reactions: Record<string, string[]> | null } | null)
+      ?.reactions ?? {}
+  const reactions: Record<string, string[]> = { ...existing }
   const userList = reactions[emoji] ?? []
-  reactions[emoji] = userList.includes(user.id)
-    ? userList.filter((id) => id !== user.id)
-    : [...userList, user.id]
+  reactions[emoji] = userList.includes(userId)
+    ? userList.filter((id) => id !== userId)
+    : [...userList, userId]
 
-  const { error } = await supabase
+  const { error } = await db
     .from('team_posts')
-    .update({ reactions })
+    .update({ reactions } as never)
     .eq('id', postId)
   if (error) return { ok: false, error: error.message }
 
@@ -69,8 +64,8 @@ export async function toggleReaction(
 }
 
 export async function deletePost(postId: string): Promise<ActionResult> {
-  const supabase = await createClient()
-  const { error } = await supabase.from('team_posts').delete().eq('id', postId)
+  const { db } = await getContext()
+  const { error } = await db.from('team_posts').delete().eq('id', postId)
   if (error) return { ok: false, error: error.message }
   revalidatePath('/team')
   return { ok: true }

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { createCase } from './actions'
+// Intake is a client component; marking its parent section dynamic isn't
+// necessary, but avoid prerendering anything up the tree that depends on env.
 import {
   ChevronRight,
   ChevronLeft,

@@ -1,8 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { getContext } from '@/lib/supabase/testing'
 import type { UserRole } from '@/types'
 
 export interface ActionResult {
@@ -11,20 +10,8 @@ export interface ActionResult {
   userId?: string
 }
 
-async function assertAdmin(): Promise<string | null> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle()
-  if (profile?.role !== 'admin') return null
-  return user.id
-}
+// Testing mode: no admin role gate. In production, wrap each action with
+// `if (profile.role !== 'admin') return { ok: false, error: ... }`.
 
 export async function createUserAccount(input: {
   email: string
@@ -32,16 +19,13 @@ export async function createUserAccount(input: {
   fullName: string
   role: UserRole
 }): Promise<ActionResult> {
-  const callerId = await assertAdmin()
-  if (!callerId) return { ok: false, error: 'Admin privileges required' }
+  const { db } = await getContext()
 
   if (!input.email.trim() || !input.password || input.password.length < 8) {
     return { ok: false, error: 'Valid email and 8+ char password required' }
   }
 
-  const admin = createAdminClient()
-
-  const { data, error } = await admin.auth.admin.createUser({
+  const { data, error } = await db.auth.admin.createUser({
     email: input.email.trim(),
     password: input.password,
     email_confirm: true,
@@ -51,7 +35,7 @@ export async function createUserAccount(input: {
     return { ok: false, error: error?.message ?? 'Failed to create user' }
   }
 
-  const { error: profileErr } = await admin.from('users').upsert([
+  const { error: profileErr } = await db.from('users').upsert([
     {
       id: data.user.id,
       email: input.email.trim(),
@@ -70,29 +54,23 @@ export async function updateUserRole(
   userId: string,
   role: UserRole
 ): Promise<ActionResult> {
-  const callerId = await assertAdmin()
-  if (!callerId) return { ok: false, error: 'Admin privileges required' }
-
-  const admin = createAdminClient()
-  const { error } = await admin
+  const { db } = await getContext()
+  const { error } = await db
     .from('users')
     .update({ role } as never)
     .eq('id', userId)
   if (error) return { ok: false, error: error.message }
-
   revalidatePath('/admin')
   return { ok: true }
 }
 
 export async function deactivateUser(userId: string): Promise<ActionResult> {
-  const callerId = await assertAdmin()
-  if (!callerId) return { ok: false, error: 'Admin privileges required' }
+  const { userId: callerId, db } = await getContext()
   if (callerId === userId) {
     return { ok: false, error: 'Cannot deactivate yourself' }
   }
 
-  const admin = createAdminClient()
-  const { error } = await admin.auth.admin.deleteUser(userId)
+  const { error } = await db.auth.admin.deleteUser(userId)
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/admin')

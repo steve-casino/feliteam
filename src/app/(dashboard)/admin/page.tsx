@@ -1,26 +1,17 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getContext } from '@/lib/supabase/testing'
 import AdminClient from './AdminClient'
 import type { Case, User } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
+// Testing mode: no role gate. In production, add:
+//   if (profile.role !== 'admin') redirect('/dashboard')
 export default async function AdminPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: me } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (me?.role !== 'admin') redirect('/dashboard')
+  const { db } = await getContext()
 
   const [{ data: users }, { data: cases }] = await Promise.all([
-    supabase.from('users').select('*'),
-    supabase.from('cases').select('*'),
+    db.from('users').select('*'),
+    db.from('cases').select('*'),
   ])
 
   return (

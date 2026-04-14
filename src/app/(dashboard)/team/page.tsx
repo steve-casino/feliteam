@@ -1,18 +1,15 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getContext } from '@/lib/supabase/testing'
 import TeamClient from './TeamClient'
 import type { TeamPost, User } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TeamPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const { userId, db } = await getContext()
 
   const [{ data: users }, { data: posts }] = await Promise.all([
-    supabase.from('users').select('*'),
-    supabase
+    db.from('users').select('*'),
+    db
       .from('team_posts')
       .select('*')
       .order('created_at', { ascending: false })
@@ -23,7 +20,7 @@ export default async function TeamPage() {
     <TeamClient
       users={(users ?? []) as User[]}
       posts={(posts ?? []) as TeamPost[]}
-      currentUserId={user.id}
+      currentUserId={userId}
     />
   )
 }

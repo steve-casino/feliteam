@@ -1,13 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
+import { getContext } from '@/lib/supabase/testing'
 import CasesList from './CasesList'
 import type { Case, User } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CasesPage() {
-  const supabase = await createClient()
+  const { db } = await getContext()
 
   const [{ data: cases }, { data: users }] = await Promise.all([
-    supabase.from('cases').select('*').order('created_at', { ascending: false }),
-    supabase.from('users').select('*'),
+    db.from('cases').select('*').order('created_at', { ascending: false }),
+    db.from('users').select('*'),
   ])
 
   return <CasesList cases={(cases ?? []) as Case[]} users={(users ?? []) as User[]} />

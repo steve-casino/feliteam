@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { getContext } from '@/lib/supabase/testing'
 import type { CaseStage, CaseNoteType } from '@/types'
 
 export interface ActionResult {
@@ -18,18 +18,16 @@ export async function addNote(
     return { ok: false, error: 'Missing case or content' }
   }
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Not authenticated' }
+  const { userId, db } = await getContext()
 
-  const { error } = await supabase.from('case_notes').insert({
-    case_id: caseId,
-    user_id: user.id,
-    content: content.trim(),
-    type,
-  })
+  const { error } = await db.from('case_notes').insert([
+    {
+      case_id: caseId,
+      user_id: userId,
+      content: content.trim(),
+      type,
+    },
+  ] as never)
 
   if (error) return { ok: false, error: error.message }
 
@@ -43,31 +41,31 @@ export async function changeStage(
 ): Promise<ActionResult> {
   if (!caseId || !stage) return { ok: false, error: 'Missing case or stage' }
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Not authenticated' }
+  const { userId, db } = await getContext()
 
-  const { data: prev } = await supabase
+  const { data: prev } = await db
     .from('cases')
     .select('stage')
     .eq('id', caseId)
     .maybeSingle()
 
-  const { error: updateErr } = await supabase
+  const { error: updateErr } = await db
     .from('cases')
-    .update({ stage })
+    .update({ stage } as never)
     .eq('id', caseId)
 
   if (updateErr) return { ok: false, error: updateErr.message }
 
-  await supabase.from('case_notes').insert({
-    case_id: caseId,
-    user_id: user.id,
-    content: `Stage changed${prev ? ` from ${prev.stage}` : ''} to ${stage}`,
-    type: 'stage_change' satisfies CaseNoteType,
-  })
+  await db.from('case_notes').insert([
+    {
+      case_id: caseId,
+      user_id: userId,
+      content: `Stage changed${
+        prev ? ` from ${(prev as { stage: string }).stage}` : ''
+      } to ${stage}`,
+      type: 'stage_change' as CaseNoteType,
+    },
+  ] as never)
 
   revalidatePath(`/cases/${caseId}`)
   revalidatePath('/cases')
@@ -78,10 +76,10 @@ export async function toggleUrgent(
   caseId: string,
   isUrgent: boolean
 ): Promise<ActionResult> {
-  const supabase = await createClient()
-  const { error } = await supabase
+  const { db } = await getContext()
+  const { error } = await db
     .from('cases')
-    .update({ is_urgent: isUrgent })
+    .update({ is_urgent: isUrgent } as never)
     .eq('id', caseId)
   if (error) return { ok: false, error: error.message }
   revalidatePath(`/cases/${caseId}`)
@@ -93,10 +91,10 @@ export async function toggleChecklistItem(
   completed: boolean,
   caseId: string
 ): Promise<ActionResult> {
-  const supabase = await createClient()
-  const { error } = await supabase
+  const { db } = await getContext()
+  const { error } = await db
     .from('checklist_items')
-    .update({ completed })
+    .update({ completed } as never)
     .eq('id', itemId)
   if (error) return { ok: false, error: error.message }
   revalidatePath(`/cases/${caseId}`)

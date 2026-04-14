@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { getContext } from '@/lib/supabase/testing'
 
 export interface ActionResult {
   ok: boolean
@@ -9,17 +9,13 @@ export interface ActionResult {
 }
 
 export async function markAsRead(id: string): Promise<ActionResult> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Not authenticated' }
+  const { userId, db } = await getContext()
 
-  const { error } = await supabase
+  const { error } = await db
     .from('notifications')
-    .update({ read: true })
+    .update({ read: true } as never)
     .eq('id', id)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/', 'layout')
@@ -27,16 +23,12 @@ export async function markAsRead(id: string): Promise<ActionResult> {
 }
 
 export async function markAllAsRead(): Promise<ActionResult> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Not authenticated' }
+  const { userId, db } = await getContext()
 
-  const { error } = await supabase
+  const { error } = await db
     .from('notifications')
-    .update({ read: true })
-    .eq('user_id', user.id)
+    .update({ read: true } as never)
+    .eq('user_id', userId)
     .eq('read', false)
   if (error) return { ok: false, error: error.message }
 
@@ -50,13 +42,15 @@ export async function createNotification(input: {
   message?: string
   type?: string
 }): Promise<ActionResult> {
-  const supabase = await createClient()
-  const { error } = await supabase.from('notifications').insert({
-    user_id: input.userId,
-    title: input.title,
-    message: input.message ?? null,
-    type: input.type ?? null,
-  })
+  const { db } = await getContext()
+  const { error } = await db.from('notifications').insert([
+    {
+      user_id: input.userId,
+      title: input.title,
+      message: input.message ?? null,
+      type: input.type ?? null,
+    },
+  ] as never)
   if (error) return { ok: false, error: error.message }
   revalidatePath('/', 'layout')
   return { ok: true }

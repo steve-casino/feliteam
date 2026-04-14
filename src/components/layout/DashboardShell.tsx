@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
 import NotificationPanel from '@/components/layout/NotificationPanel'
 import type { Notification } from '@/types'
+import { markAsRead, markAllAsRead } from '@/lib/actions/notifications'
 
 interface CurrentUser {
   full_name: string
@@ -25,6 +27,8 @@ const DashboardShell: React.FC<DashboardShellProps> = ({
   initialNotifications,
   children,
 }) => {
+  const router = useRouter()
+  const [, startTransition] = useTransition()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications)
@@ -36,12 +40,25 @@ const DashboardShell: React.FC<DashboardShellProps> = ({
     () => setNotificationPanelOpen((v) => !v),
     []
   )
-  const handleMarkAsRead = useCallback((id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-  }, [])
+  const handleMarkAsRead = useCallback(
+    (id: string) => {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      )
+      startTransition(async () => {
+        await markAsRead(id)
+        router.refresh()
+      })
+    },
+    [router]
+  )
   const handleMarkAllAsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }, [])
+    startTransition(async () => {
+      await markAllAsRead()
+      router.refresh()
+    })
+  }, [router])
 
   return (
     <div className="min-h-screen bg-navy">

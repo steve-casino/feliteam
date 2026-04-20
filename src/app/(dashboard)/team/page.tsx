@@ -2,14 +2,15 @@
 
 import React, { useState, useMemo } from 'react'
 import { formatDistanceToNow } from 'date-fns'
-import { Send } from 'lucide-react'
+import { Send, Video, Users, DoorOpen } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Avatar from '@/components/ui/Avatar'
 import Modal from '@/components/ui/Modal'
+import VideoRoom from '@/components/team/VideoRoom'
 import { mockTeamPosts, mockUsers, mockCases } from '@/lib/mock-data'
 import { useTranslation } from '@/hooks/useLanguage'
 
-type TabType = 'feed' | 'shoutouts' | 'huddles'
+type TabType = 'feed' | 'shoutouts' | 'huddles' | 'meetings'
 type PostType = 'announcement' | 'celebration' | 'shoutout' | 'poll'
 
 interface UIPost {
@@ -102,6 +103,30 @@ const TeamPage: React.FC = () => {
   ])
 
   const reactionEmojis = ['🔥', '👏', '💪', '🎉', '❤️']
+
+  // Meeting rooms state
+  const [activeRoom, setActiveRoom] = useState<string | null>(null)
+
+  const meetingRooms = [
+    {
+      id: 'room-general',
+      name: 'Room 1 — General',
+      description: 'Open room for daily standups, quick syncs, and team discussions',
+      participants: 3,
+      maxParticipants: 20,
+      status: 'active' as const,
+      activeUsers: ['Carlos Rivera', 'Jessica Chen', 'Ahmed Hassan'],
+    },
+    {
+      id: 'room-case-review',
+      name: 'Room 2 — Case Review',
+      description: 'Dedicated space for case strategy sessions and client reviews',
+      participants: 0,
+      maxParticipants: 20,
+      status: 'empty' as const,
+      activeUsers: [],
+    },
+  ]
 
   const handlePostSubmit = () => {
     if (!postContent.trim()) return
@@ -229,11 +254,11 @@ const TeamPage: React.FC = () => {
       </div>
 
       <div className="flex gap-2 border-b border-white/10">
-        {(['feed', 'shoutouts', 'huddles'] as const).map((tab) => (
+        {(['feed', 'shoutouts', 'huddles', 'meetings'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-3 font-medium transition-colors border-b-2 ${
+            className={`px-4 py-3 font-medium transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === tab
                 ? 'border-blue-400 text-blue-400'
                 : 'border-transparent text-white/50 hover:text-white/70'
@@ -242,6 +267,7 @@ const TeamPage: React.FC = () => {
             {tab === 'feed' && 'Feed'}
             {tab === 'shoutouts' && 'Shoutouts'}
             {tab === 'huddles' && 'Huddles'}
+            {tab === 'meetings' && (<><Video className="w-4 h-4" /> Meetings</>)}
           </button>
         ))}
       </div>
@@ -520,6 +546,100 @@ const TeamPage: React.FC = () => {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {/* Meetings Tab */}
+      {activeTab === 'meetings' && (
+        <div className="space-y-6">
+          {activeRoom ? (
+            <VideoRoom
+              roomName={meetingRooms.find((r) => r.id === activeRoom)?.name || 'Meeting Room'}
+              roomId={activeRoom}
+              currentUser={{ id: mockUsers[0].id, full_name: mockUsers[0].full_name, avatar_url: mockUsers[0].avatar_url }}
+              onLeave={() => setActiveRoom(null)}
+            />
+          ) : (
+            <>
+              <div className="flex items-center gap-3">
+                <Video className="w-6 h-6 text-blue-400" />
+                <div>
+                  <h2 className="text-xl font-bold text-white">Meeting Rooms</h2>
+                  <p className="text-white/50 text-sm">Join a room to start a video call with your team</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {meetingRooms.map((room) => (
+                  <Card key={room.id} variant={room.status === 'active' ? 'highlighted' : 'default'}>
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-lg font-bold text-white">{room.name}</h3>
+                          <p className="text-sm text-white/50 mt-1">{room.description}</p>
+                        </div>
+                        {room.status === 'active' && (
+                          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-400/15 text-teal-400 text-xs font-semibold">
+                            <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                            Live
+                          </span>
+                        )}
+                        {room.status === 'empty' && (
+                          <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/40 text-xs font-semibold">
+                            Empty
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-white/40" />
+                        <span className="text-sm text-white/60">
+                          {room.participants} / {room.maxParticipants} participants
+                        </span>
+                      </div>
+
+                      {room.activeUsers.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-2">
+                            {room.activeUsers.map((name) => (
+                              <div
+                                key={name}
+                                className="w-8 h-8 rounded-full bg-blue-500/20 border-2 border-navy-50 flex items-center justify-center text-xs font-bold text-blue-400"
+                                title={name}
+                              >
+                                {name.split(' ').map((n: string) => n[0]).join('')}
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-xs text-white/40">
+                            {room.activeUsers.join(', ')}
+                          </span>
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => setActiveRoom(room.id)}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all active:scale-95 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/20"
+                      >
+                        <DoorOpen className="w-5 h-5" />
+                        Join Room
+                      </button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <Card>
+                <div className="flex items-start gap-3">
+                  <Video className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-white/50 space-y-1">
+                    <p className="text-white/70 font-medium">How Meeting Rooms Work</p>
+                    <p>Click &quot;Join Room&quot; to enter with your camera and microphone. You can toggle your camera, mic, and share your screen during the call. Use the in-room chat for quick messages.</p>
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
         </div>
       )}
 

@@ -52,9 +52,9 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-navy flex items-center justify-center p-4 relative overflow-hidden">
       {/* Gradient Mesh Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl" />
       </div>
 
       {/* Login Card */}
@@ -63,10 +63,10 @@ const LoginPage: React.FC = () => {
           {/* Logo and Tagline */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="p-2 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg">
+              <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">
                 <Zap className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-purple-400">InjuryFlow</h1>
+              <h1 className="text-2xl font-bold text-blue-400">InjuryFlow</h1>
             </div>
             <p className="text-sm text-white/60">Your PI Firm, Gamified.</p>
           </div>
@@ -84,7 +84,7 @@ const LoginPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@injuryflow.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-navy-200 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/30 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-navy-200 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 transition-all"
                   required
                 />
               </div>
@@ -102,7 +102,7 @@ const LoginPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full pl-10 pr-10 py-2.5 bg-navy-200 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/30 transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 bg-navy-200 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 transition-all"
                   required
                 />
                 <button
@@ -124,7 +124,7 @@ const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || !email || !password}
-              className="w-full py-2.5 bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 disabled:from-purple-400/50 disabled:to-purple-600/50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-purple-500/20"
+              className="w-full py-2.5 bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 disabled:from-blue-400/50 disabled:to-blue-600/50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-blue-500/20"
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
@@ -142,7 +142,7 @@ const LoginPage: React.FC = () => {
             <button
               onClick={() => handleDemoLogin('admin')}
               disabled={isLoading}
-              className="w-full py-2.5 bg-white/5 hover:bg-white/10 disabled:bg-white/5 disabled:cursor-not-allowed border border-white/10 hover:border-purple-400/30 text-white font-medium rounded-lg transition-all text-sm"
+              className="w-full py-2.5 bg-white/5 hover:bg-white/10 disabled:bg-white/5 disabled:cursor-not-allowed border border-white/10 hover:border-blue-400/30 text-white font-medium rounded-lg transition-all text-sm"
             >
               Login as Admin
             </button>

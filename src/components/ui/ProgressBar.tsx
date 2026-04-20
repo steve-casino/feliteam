@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 
 interface ProgressBarProps {
   value: number
-  color?: 'purple' | 'teal' | 'coral'
+  color?: 'blue' | 'teal' | 'coral'
   size?: 'sm' | 'md' | 'lg'
   showLabel?: boolean
   className?: string
@@ -14,7 +14,7 @@ const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
   (
     {
       value,
-      color = 'purple',
+      color = 'blue',
       size = 'md',
       showLabel = false,
       className = ''
@@ -28,7 +28,7 @@ const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
     }, [value])
 
     const colorClasses = {
-      purple: 'bg-purple-400',
+      blue: 'bg-blue-500',
       teal: 'bg-teal-400',
       coral: 'bg-coral-400'
     }

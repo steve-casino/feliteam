@@ -164,7 +164,7 @@ const DashboardPage: React.FC = () => {
         <Card>
           <div className="space-y-1">
             <p className="text-white/70 text-sm font-semibold">Active Cases</p>
-            <p className="text-3xl font-bold text-purple-400">{activeCount}</p>
+            <p className="text-3xl font-bold text-blue-400">{activeCount}</p>
           </div>
         </Card>
         <Card>
@@ -254,9 +254,9 @@ const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <button
           onClick={() => setModalData({ type: 'call' })}
-          className="p-4 rounded-lg bg-purple-400/10 border border-purple-400/20 hover:border-purple-400/40 hover:bg-purple-400/15 transition-all group"
+          className="p-4 rounded-lg bg-blue-500/10 border border-blue-400/20 hover:border-blue-400/40 hover:bg-blue-500/15 transition-all group"
         >
-          <Phone className="w-6 h-6 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
+          <Phone className="w-6 h-6 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
           <p className="text-sm font-semibold text-white">Log Call</p>
         </button>
 
@@ -360,7 +360,7 @@ const DashboardPage: React.FC = () => {
                     {!isExpanded && (
                       <button
                         onClick={() => toggleTemplate(template.id)}
-                        className="flex-1 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                        className="flex-1 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
                       >
                         Expand
                       </button>
@@ -368,7 +368,7 @@ const DashboardPage: React.FC = () => {
 
                     <button
                       onClick={() => copyTemplate(template.id, content)}
-                      className="flex items-center gap-2 flex-1 px-3 py-2 rounded bg-purple-400/10 hover:bg-purple-400/20 transition-colors text-xs font-semibold text-purple-400"
+                      className="flex items-center gap-2 flex-1 px-3 py-2 rounded bg-blue-500/10 hover:bg-blue-500/20 transition-colors text-xs font-semibold text-blue-400"
                     >
                       {copiedTemplate === template.id ? (
                         <>

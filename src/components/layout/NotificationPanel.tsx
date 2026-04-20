@@ -104,7 +104,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
                       className={`w-full text-left p-3 rounded-lg transition-all ${
                         notif.read
                           ? 'bg-white/5 hover:bg-white/10'
-                          : 'bg-purple-400/10 hover:bg-purple-400/20 border border-purple-400/20'
+                          : 'bg-blue-500/10 hover:bg-blue-500/20 border border-blue-400/20'
                       }`}
                     >
                       <div className="flex gap-3">
@@ -140,7 +140,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
                       className={`w-full text-left p-3 rounded-lg transition-all ${
                         notif.read
                           ? 'bg-white/5 hover:bg-white/10'
-                          : 'bg-purple-400/10 hover:bg-purple-400/20 border border-purple-400/20'
+                          : 'bg-blue-500/10 hover:bg-blue-500/20 border border-blue-400/20'
                       }`}
                     >
                       <div className="flex gap-3">

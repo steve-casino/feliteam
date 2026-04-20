@@ -13,8 +13,8 @@ const StagePill = React.forwardRef<HTMLDivElement, StagePillProps>(
     const stageConfig = {
       new_case: {
         label: 'New Case',
-        bg: 'bg-purple-500/20',
-        text: 'text-purple-400'
+        bg: 'bg-blue-600/20',
+        text: 'text-blue-400'
       },
       trt: {
         label: 'Treatment',

@@ -49,8 +49,8 @@ const MARITAL_OPTIONS_ES = ['Casado/a', 'Soltero/a', 'Divorciado/a', 'Nunca Casa
 const STEP_LABELS_EN = ['Your Info', 'Accident', 'Injuries', 'Your Vehicle', 'Other Vehicle', 'Review']
 const STEP_LABELS_ES = ['Tu Info', 'Accidente', 'Lesiones', 'Tu Vehículo', 'Otro Vehículo', 'Revisión']
 
-const SECTION_COLORS = ['bg-coral-400', 'bg-blue-500', 'bg-red-500', 'bg-coral-400', 'bg-blue-500', 'bg-purple-400']
-const SECTION_BORDER_COLORS = ['border-coral-400', 'border-blue-500', 'border-red-500', 'border-coral-400', 'border-blue-500', 'border-purple-400']
+const SECTION_COLORS = ['bg-coral-400', 'bg-blue-500', 'bg-red-500', 'bg-coral-400', 'bg-blue-500', 'bg-blue-500']
+const SECTION_BORDER_COLORS = ['border-coral-400', 'border-blue-500', 'border-red-500', 'border-coral-400', 'border-blue-500', 'border-blue-400']
 
 // ───────────────────────────────────────────────────────────────────
 // Bilingual labels
@@ -288,7 +288,7 @@ const IntakePage: React.FC = () => {
   // ─── Shared UI helpers ───
 
   const inputCls = (field?: string) =>
-    `w-full bg-navy border ${field && validationErrors.has(field) ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-2.5 text-white placeholder:text-white/30 focus:border-purple-400 focus:outline-none transition-colors`
+    `w-full bg-navy border ${field && validationErrors.has(field) ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-2.5 text-white placeholder:text-white/30 focus:border-blue-400 focus:outline-none transition-colors`
 
   const selectCls = (field?: string) => inputCls(field)
 
@@ -307,7 +307,7 @@ const IntakePage: React.FC = () => {
           <input
             type="radio" name={name} checked={value === v}
             onChange={() => upRadio(setter, field, v)}
-            className="w-4 h-4 accent-purple-400"
+            className="w-4 h-4 accent-blue-400"
           />
           <span className="text-white text-sm">{v === 'yes' ? L('Yes', 'Sí', language) : 'No'}</span>
         </label>
@@ -345,12 +345,12 @@ const IntakePage: React.FC = () => {
                   animationDelay: `${Math.random() * 0.8}s`,
                 }}
               >
-                <Sparkles className={`w-4 h-4 ${['text-purple-400','text-teal-400','text-coral-400'][i % 3]}`} />
+                <Sparkles className={`w-4 h-4 ${['text-blue-400','text-teal-400','text-coral-400'][i % 3]}`} />
               </div>
             ))}
           </div>
 
-          <div className="relative z-10 bg-gradient-to-br from-navy-50 to-navy-200 rounded-2xl border border-purple-400/30 p-8 text-center">
+          <div className="relative z-10 bg-gradient-to-br from-navy-50 to-navy-200 rounded-2xl border border-blue-400/30 p-8 text-center">
             <div className="flex justify-center mb-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-teal-400 rounded-full blur-lg opacity-50 animate-pulse" />
@@ -370,7 +370,7 @@ const IntakePage: React.FC = () => {
             <div className="space-y-4 mb-8">
               <div className="bg-navy rounded-lg p-4 border border-white/10">
                 <p className="text-white/60 text-sm mb-1">{L('Case Number', 'Número de Caso', language)}</p>
-                <p className="text-2xl font-bold text-purple-400">{generatedCaseNumber}</p>
+                <p className="text-2xl font-bold text-blue-400">{generatedCaseNumber}</p>
               </div>
 
               {assignedCaseManager && (
@@ -417,7 +417,7 @@ const IntakePage: React.FC = () => {
                 setYourVehicleDamage([])
                 setOtherVehicleDamage([])
               }}
-              className="w-full bg-purple-400 hover:bg-purple-500 text-white font-semibold py-3 rounded-lg transition-colors"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors"
             >
               {L('Create Another Case', 'Crear Otro Caso', language)}
             </button>
@@ -444,7 +444,7 @@ const IntakePage: React.FC = () => {
                 step < currentStep
                   ? 'bg-teal-400 text-white'
                   : step === currentStep
-                  ? 'bg-purple-400 text-white'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-navy-200 text-white/50'
               }`}
             >
@@ -459,7 +459,7 @@ const IntakePage: React.FC = () => {
       {/* Labels */}
       <div className="grid grid-cols-6 gap-1">
         {stepLabels.map((label, i) => (
-          <p key={i} className={`text-center text-[10px] md:text-xs font-medium ${i + 1 === currentStep ? 'text-purple-400' : i + 1 < currentStep ? 'text-teal-400' : 'text-white/40'}`}>
+          <p key={i} className={`text-center text-[10px] md:text-xs font-medium ${i + 1 === currentStep ? 'text-blue-400' : i + 1 < currentStep ? 'text-teal-400' : 'text-white/40'}`}>
             {label}
           </p>
         ))}
@@ -581,7 +581,7 @@ const IntakePage: React.FC = () => {
                 type="radio" name="roleInAccident"
                 checked={personal.roleInAccident === role}
                 onChange={() => upRadio(setPersonal, 'roleInAccident', role)}
-                className="w-4 h-4 accent-purple-400"
+                className="w-4 h-4 accent-blue-400"
               />
               <span className="text-white text-sm">
                 {L(role, role === 'Driver' ? 'Conductor' : role === 'Passenger' ? 'Pasajero' : 'Peatón', language)}
@@ -985,7 +985,7 @@ const IntakePage: React.FC = () => {
       {/* Header */}
       <div className="text-center border-b border-white/10 pb-4">
         <h2 className="text-2xl font-bold text-white">Felicetti Law Firm</h2>
-        <p className="text-purple-400 text-sm font-semibold mt-1">{L('Case Intake — Motor Vehicle', 'Admisión de Caso — Vehículo Motor', language)}</p>
+        <p className="text-blue-400 text-sm font-semibold mt-1">{L('Case Intake — Motor Vehicle', 'Admisión de Caso — Vehículo Motor', language)}</p>
         <p className="text-white/50 text-xs mt-1">{L('Case #', 'Caso #', language)} {caseNumber} &mdash; {L('Assigned to', 'Asignado a', language)}: {caseManager.full_name}</p>
       </div>
 
@@ -1125,8 +1125,8 @@ const IntakePage: React.FC = () => {
       </div>
 
       {/* Administrative fields */}
-      <div className="bg-navy-50 rounded-xl border border-purple-400/20 p-5 space-y-4">
-        <h3 className="text-sm font-bold text-purple-400 uppercase">{L('Administrative', 'Administrativo', language)}</h3>
+      <div className="bg-navy-50 rounded-xl border border-blue-400/20 p-5 space-y-4">
+        <h3 className="text-sm font-bold text-blue-400 uppercase">{L('Administrative', 'Administrativo', language)}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className={labelCls}>{L('Referral Code', 'Código de Referencia', language)}</label>
@@ -1178,7 +1178,7 @@ const IntakePage: React.FC = () => {
         {renderStepIndicator()}
 
         {/* Form Card */}
-        <div className="bg-gradient-to-br from-navy-50 to-navy-200 rounded-2xl border border-purple-400/20 p-5 md:p-8 shadow-xl">
+        <div className="bg-gradient-to-br from-navy-50 to-navy-200 rounded-2xl border border-blue-400/20 p-5 md:p-8 shadow-xl">
           <form onSubmit={handleSubmit}>
             {/* Step content with transitions */}
             <div
@@ -1227,7 +1227,7 @@ const IntakePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-purple-400 hover:bg-purple-500 text-white font-semibold rounded-lg transition-all shadow-lg shadow-purple-400/20"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all shadow-lg shadow-blue-500/20"
                 >
                   {L('Next', 'Siguiente', language)}
                   <ChevronRight className="w-5 h-5" />

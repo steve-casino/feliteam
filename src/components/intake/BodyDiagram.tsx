@@ -227,7 +227,7 @@ function Zone({ zone, isSelected, label, onClick, readonly }: ZoneProps) {
   const fill = isSelected
     ? 'rgba(216, 90, 48, 0.4)'
     : hovered && !readonly
-    ? 'rgba(127, 119, 221, 0.15)'
+    ? 'rgba(59, 130, 246, 0.15)'
     : 'transparent';
 
   const stroke = isSelected ? '#D85A30' : 'transparent';
@@ -281,7 +281,7 @@ function Zone({ zone, isSelected, label, onClick, readonly }: ZoneProps) {
             height={16}
             rx={4}
             fill="rgba(15, 15, 26, 0.92)"
-            stroke="rgba(127, 119, 221, 0.4)"
+            stroke="rgba(59, 130, 246, 0.4)"
             strokeWidth={0.5}
           />
           <text

@@ -38,7 +38,7 @@ const XPDisplay = React.forwardRef<HTMLDivElement, XPDisplayProps>(
       <div ref={ref} className={`space-y-2 ${className}`}>
         <div className="flex items-end gap-2">
           <div>
-            <p className="text-2xl font-bold text-purple-400">
+            <p className="text-2xl font-bold text-blue-400">
               {displayXp.toLocaleString()}
             </p>
             <p className="text-xs text-white/50">XP Points</p>
@@ -49,7 +49,7 @@ const XPDisplay = React.forwardRef<HTMLDivElement, XPDisplayProps>(
             </p>
           )}
         </div>
-        <ProgressBar value={progressPercent} color="purple" size="sm" />
+        <ProgressBar value={progressPercent} color="blue" size="sm" />
         <p className="text-xs text-white/50">
           {xpInLevel.toLocaleString()} / {xpToNextLevel.toLocaleString()} XP
           to next level

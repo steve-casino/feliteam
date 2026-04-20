@@ -28,15 +28,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantClasses = {
       primary:
-        'bg-purple-400 text-white hover:bg-purple-500 focus:ring-purple-400',
+        'bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-400',
       secondary:
-        'bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20 focus:ring-purple-400',
+        'bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20 focus:ring-blue-400',
       danger:
         'bg-coral-400 text-white hover:bg-coral-500 focus:ring-coral-400',
       success:
         'bg-teal-400 text-white hover:bg-teal-500 focus:ring-teal-400',
       ghost:
-        'bg-transparent text-white hover:bg-white/5 focus:ring-purple-400'
+        'bg-transparent text-white hover:bg-white/5 focus:ring-blue-400'
     }
 
     const sizeClasses = {

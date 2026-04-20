@@ -9,7 +9,7 @@ export const CASE_STAGES: Array<{
   {
     label: 'New Case',
     value: 'new_case',
-    color: 'purple',
+    color: 'blue',
     description: 'Case intake and initial setup'
   },
   {

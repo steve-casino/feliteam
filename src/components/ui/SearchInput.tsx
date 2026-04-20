@@ -48,7 +48,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
     return (
       <div
-        className={`flex items-center gap-2 px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg hover:border-white/20 focus-within:border-purple-400 focus-within:ring-1 focus-within:ring-purple-400/30 transition-all ${className}`}
+        className={`flex items-center gap-2 px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg hover:border-white/20 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400/30 transition-all ${className}`}
       >
         <Search className="w-5 h-5 text-white/50 flex-shrink-0" />
         <input

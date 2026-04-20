@@ -34,7 +34,7 @@ const LanguageToggle = React.forwardRef<HTMLDivElement, LanguageToggleProps>(
           }}
           className={`px-4 py-1.5 rounded-full font-medium transition-all text-sm ${
             language === 'en'
-              ? 'bg-purple-400 text-white'
+              ? 'bg-blue-500 text-white'
               : 'text-white/70 hover:text-white'
           }`}
         >
@@ -48,7 +48,7 @@ const LanguageToggle = React.forwardRef<HTMLDivElement, LanguageToggleProps>(
           }}
           className={`px-4 py-1.5 rounded-full font-medium transition-all text-sm ${
             language === 'es'
-              ? 'bg-purple-400 text-white'
+              ? 'bg-blue-500 text-white'
               : 'text-white/70 hover:text-white'
           }`}
         >

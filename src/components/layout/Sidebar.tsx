@@ -87,13 +87,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
       <div className="p-6 border-b border-white/10 flex items-center justify-between">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="text-purple-400 text-xl">
+            <div className="text-blue-400 text-xl">
               <Zap className="w-6 h-6" />
             </div>
-            <span className="text-lg font-bold text-purple-400">InjuryFlow</span>
+            <span className="text-lg font-bold text-blue-400">InjuryFlow</span>
           </div>
         )}
-        {collapsed && <div className="text-purple-400"><Zap className="w-6 h-6" /></div>}
+        {collapsed && <div className="text-blue-400"><Zap className="w-6 h-6" /></div>}
       </div>
 
       {/* Navigation Items */}
@@ -108,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 active
-                  ? 'bg-purple-400 text-white'
+                  ? 'bg-blue-500 text-white'
                   : 'text-white/70 hover:text-white hover:bg-white/5'
               }`}
               title={collapsed ? item.label : undefined}
@@ -158,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
               </div>
               <div className="mt-1.5 bg-navy-200 rounded-full h-1.5 w-full">
                 <div
-                  className="bg-gradient-to-r from-purple-400 to-teal-400 h-full rounded-full"
+                  className="bg-gradient-to-r from-blue-400 to-teal-400 h-full rounded-full"
                   style={{ width: `${Math.min((currentUser.xp_points % 1000) / 10, 100)}%` }}
                 />
               </div>

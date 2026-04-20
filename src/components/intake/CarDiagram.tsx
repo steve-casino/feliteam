@@ -279,8 +279,8 @@ export default function CarDiagram({
               stroke = '#D85A30';
               strokeWidth = 2;
             } else if (isHovered && !readonly) {
-              fill = 'rgba(127, 119, 221, 0.2)';
-              stroke = 'rgba(127, 119, 221, 0.4)';
+              fill = 'rgba(59, 130, 246, 0.2)';
+              stroke = 'rgba(59, 130, 246, 0.4)';
               strokeWidth = 1.5;
             }
 

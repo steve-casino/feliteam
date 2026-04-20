@@ -16,7 +16,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         ref={ref}
         className={`flex flex-col items-center gap-3 p-4 rounded-lg transition-all duration-200 ${
           earned
-            ? 'bg-gradient-to-br from-purple-500/20 to-teal-500/20 ring-1 ring-purple-400/30 shadow-lg shadow-purple-500/20'
+            ? 'bg-gradient-to-br from-blue-500/20 to-teal-500/20 ring-1 ring-blue-400/30 shadow-lg shadow-blue-500/20'
             : 'bg-white/5 opacity-50 grayscale'
         } ${className}`}
       >

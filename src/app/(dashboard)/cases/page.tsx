@@ -221,7 +221,7 @@ const CasesPage: React.FC = () => {
 
             {/* Client Name */}
             <div>
-              <p className="text-white font-semibold text-base group-hover:text-purple-300 transition-colors">
+              <p className="text-white font-semibold text-base group-hover:text-blue-300 transition-colors">
                 {caseObj.client_name}
               </p>
             </div>
@@ -371,7 +371,7 @@ const CasesPage: React.FC = () => {
               setStageFilter(e.target.value)
               setCurrentPage(1)
             }}
-            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-purple-400"
+            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
           >
             <option value="">All Stages</option>
             <option value="new_case">New Case</option>
@@ -389,7 +389,7 @@ const CasesPage: React.FC = () => {
               setStateFilter(e.target.value)
               setCurrentPage(1)
             }}
-            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-purple-400"
+            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
           >
             <option value="">All States</option>
             {uniqueStates.map((state) => (
@@ -406,7 +406,7 @@ const CasesPage: React.FC = () => {
               setCaseManagerFilter(e.target.value)
               setCurrentPage(1)
             }}
-            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-purple-400"
+            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
           >
             <option value="">All Managers</option>
             {uniqueCaseManagers.map((manager) => (
@@ -424,7 +424,7 @@ const CasesPage: React.FC = () => {
               setDateFromFilter(e.target.value)
               setCurrentPage(1)
             }}
-            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-purple-400"
+            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
           />
 
           {/* Date To */}
@@ -435,7 +435,7 @@ const CasesPage: React.FC = () => {
               setDateToFilter(e.target.value)
               setCurrentPage(1)
             }}
-            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-purple-400"
+            className="px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
           />
         </div>
 
@@ -446,7 +446,7 @@ const CasesPage: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortBy)}
-              className="px-3 py-1.5 bg-navy-50 border border-white/10 rounded text-white text-sm focus:outline-none focus:border-purple-400"
+              className="px-3 py-1.5 bg-navy-50 border border-white/10 rounded text-white text-sm focus:outline-none focus:border-blue-400"
             >
               <option value="urgency">Urgency (Urgent First)</option>
               <option value="case_number">Case Number</option>
@@ -461,7 +461,7 @@ const CasesPage: React.FC = () => {
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-purple-400/30 text-purple-400'
+                  ? 'bg-blue-500/30 text-blue-400'
                   : 'text-white/50 hover:text-white'
               }`}
               title="Grid view"
@@ -472,7 +472,7 @@ const CasesPage: React.FC = () => {
               onClick={() => setViewMode('list')}
               className={`p-2 rounded transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-purple-400/30 text-purple-400'
+                  ? 'bg-blue-500/30 text-blue-400'
                   : 'text-white/50 hover:text-white'
               }`}
               title="List view"
@@ -548,7 +548,7 @@ const CasesPage: React.FC = () => {
                       onClick={() => setCurrentPage(pageNum)}
                       className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
                         pageNum === currentPage
-                          ? 'bg-purple-400 text-white'
+                          ? 'bg-blue-500 text-white'
                           : 'text-white/60 hover:bg-white/10'
                       }`}
                     >

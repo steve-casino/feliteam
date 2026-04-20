@@ -169,7 +169,7 @@ const CaseDetailPage: React.FC = () => {
           <select
             value={selectedStage}
             onChange={(e) => setSelectedStage(e.target.value as CaseStage)}
-            className="w-full px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-400"
+            className="w-full px-4 py-2.5 bg-navy-50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-400"
           >
             {CASE_STAGES.map((stage) => (
               <option key={stage.value} value={stage.value}>
@@ -205,7 +205,7 @@ const CaseDetailPage: React.FC = () => {
               <p className="text-xs text-white/60 uppercase tracking-wide">Phone</p>
               <a
                 href={`tel:${caseObj.client_phone}`}
-                className="text-purple-400 hover:text-purple-300 font-medium flex items-center gap-2 transition-colors"
+                className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-2 transition-colors"
               >
                 <Phone className="w-4 h-4" />
                 {caseObj.client_phone}
@@ -266,12 +266,12 @@ const CaseDetailPage: React.FC = () => {
 
             <div>
               <p className="text-xs text-white/60 uppercase tracking-wide">UM Policy</p>
-              <p className="text-purple-300 font-semibold">{caseObj.insurance_um_policy}</p>
+              <p className="text-blue-300 font-semibold">{caseObj.insurance_um_policy}</p>
             </div>
 
             <div>
               <p className="text-xs text-white/60 uppercase tracking-wide">BI Info</p>
-              <p className="text-purple-300 font-semibold">{caseObj.insurance_bi_info}</p>
+              <p className="text-blue-300 font-semibold">{caseObj.insurance_bi_info}</p>
             </div>
 
             {caseObj.has_insurance_warning && (
@@ -342,14 +342,14 @@ const CaseDetailPage: React.FC = () => {
 
             <div>
               <p className="text-xs text-white/60 uppercase tracking-wide">BI LOR Status</p>
-              <p className="text-purple-300 capitalize font-medium mt-1">
+              <p className="text-blue-300 capitalize font-medium mt-1">
                 {caseObj.bi_lor_status}
               </p>
             </div>
 
             <div>
               <p className="text-xs text-white/60 uppercase tracking-wide">UM/PIP LOR Status</p>
-              <p className="text-purple-300 capitalize font-medium mt-1">
+              <p className="text-blue-300 capitalize font-medium mt-1">
                 {caseObj.um_pip_lor_status}
               </p>
             </div>
@@ -478,7 +478,7 @@ const CaseDetailPage: React.FC = () => {
                 onClick={() => setActiveNoteTab(tab)}
                 className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                   activeNoteTab === tab
-                    ? 'border-purple-400 text-purple-400'
+                    ? 'border-blue-400 text-blue-400'
                     : 'border-transparent text-white/60 hover:text-white'
                 }`}
               >
@@ -515,7 +515,7 @@ const CaseDetailPage: React.FC = () => {
                 value={newNoteContent}
                 onChange={(e) => setNewNoteContent(e.target.value)}
                 placeholder="Enter your note..."
-                className="w-full px-4 py-3 bg-navy-50 border border-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-purple-400 resize-none h-32"
+                className="w-full px-4 py-3 bg-navy-50 border border-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400 resize-none h-32"
               />
               <div className="flex gap-3">
                 <Button
@@ -558,7 +558,7 @@ const CaseDetailPage: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <span className="px-2 py-1 text-xs rounded bg-purple-500/20 text-purple-300">
+                      <span className="px-2 py-1 text-xs rounded bg-blue-600/20 text-blue-300">
                         {note.type === 'call_log'
                           ? 'Call'
                           : note.type === 'treatment_log'

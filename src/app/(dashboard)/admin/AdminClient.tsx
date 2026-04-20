@@ -25,7 +25,7 @@ import type { Case, User } from '@/types'
 const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
   const getRoleColor = (r: string) => {
     const colors: Record<string, string> = {
-      case_manager: 'bg-purple-500/20 text-purple-400',
+      case_manager: 'bg-blue-500/20 text-blue-400',
       medical_manager: 'bg-teal-500/20 text-teal-400',
       intake_agent: 'bg-blue-500/20 text-blue-400',
       admin: 'bg-coral-500/20 text-coral-400'
@@ -92,7 +92,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
   const chartColors = {
     navy: '#0F0F1A',
     navy50: '#1A1A2E',
-    purple: '#7F77DD',
+    blue: '#3B82F6',
     teal: '#1D9E75',
     coral: '#D85A30'
   }
@@ -182,7 +182,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
       label: 'Total Active Cases',
       value: mockCases.filter((c) => c.stage !== 'srl').length,
       trend: '+12%',
-      color: 'text-purple-400'
+      color: 'text-blue-400'
     },
     {
       label: 'Cases Closed This Month',
@@ -264,7 +264,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-3 font-medium transition-colors border-b-2 ${
               activeTab === tab
-                ? 'border-purple-400 text-purple-400'
+                ? 'border-blue-400 text-blue-400'
                 : 'border-transparent text-white/50 hover:text-white/70'
             }`}
           >
@@ -314,7 +314,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
                       border: `1px solid ${chartColors.navy}`,
                       borderRadius: '8px'
                     }}
-                    labelStyle={{ color: chartColors.purple }}
+                    labelStyle={{ color: chartColors.blue }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -342,9 +342,9 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
                       border: `1px solid ${chartColors.navy}`,
                       borderRadius: '8px'
                     }}
-                    labelStyle={{ color: chartColors.purple }}
+                    labelStyle={{ color: chartColors.blue }}
                   />
-                  <Bar dataKey="cases" fill={chartColors.purple} radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="cases" fill={chartColors.blue} radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -363,15 +363,15 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
                     border: `1px solid ${chartColors.navy}`,
                     borderRadius: '8px'
                   }}
-                  labelStyle={{ color: chartColors.purple }}
+                  labelStyle={{ color: chartColors.blue }}
                 />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="opened"
-                  stroke={chartColors.purple}
+                  stroke={chartColors.blue}
                   strokeWidth={2}
-                  dot={{ fill: chartColors.purple, r: 4 }}
+                  dot={{ fill: chartColors.blue, r: 4 }}
                   activeDot={{ r: 6 }}
                 />
                 <Line
@@ -431,11 +431,11 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
                     <td className="text-center px-4 py-3 text-teal-400 font-semibold">{manager.cases_closed}</td>
                     <td className="text-center px-4 py-3 text-white/70">{manager.avg_days}d</td>
                     <td className="text-center px-4 py-3">
-                      <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-semibold">
+                      <span className="px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-semibold">
                         {manager.checklist_percent}%
                       </span>
                     </td>
-                    <td className="text-center px-4 py-3 text-purple-400 font-semibold">
+                    <td className="text-center px-4 py-3 text-blue-400 font-semibold">
                       +{manager.xp}
                     </td>
                   </tr>
@@ -451,7 +451,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
           <div className="flex justify-end">
             <button
               onClick={() => setAddUserModal(true)}
-              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium flex items-center gap-2 transition-colors"
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium flex items-center gap-2 transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add User
@@ -491,7 +491,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
                     <td className="px-4 py-3">
                       <RoleBadge role={user.role} />
                     </td>
-                    <td className="text-center px-4 py-3 text-purple-400 font-semibold">
+                    <td className="text-center px-4 py-3 text-blue-400 font-semibold">
                       {user.xp_points}
                     </td>
                     <td className="text-center px-4 py-3 text-teal-400 font-semibold">
@@ -536,7 +536,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
               {['Treatment Gaps', 'Police Report Flags', 'Document Received', 'Case Assignment', 'Badge Earned'].map(
                 (notif) => (
                   <label key={notif} className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-purple-400" />
+                    <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-blue-400" />
                     <span className="text-white/80">{notif}</span>
                   </label>
                 )
@@ -547,7 +547,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
           <Card className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Auto-Assignment Rules</h3>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-purple-400" />
+              <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-blue-400" />
               <span className="text-white/80">Enable auto-assignment</span>
             </label>
             <p className="text-white/60 text-sm">
@@ -572,9 +572,9 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
               <input
                 type="text"
                 placeholder="Add new clinic..."
-                className="flex-1 px-3 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none text-sm"
+                className="flex-1 px-3 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none text-sm"
               />
-              <button className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium text-sm transition-colors">
+              <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium text-sm transition-colors">
                 Add
               </button>
             </div>
@@ -594,9 +594,9 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
               <input
                 type="text"
                 placeholder="Add new insurance company..."
-                className="flex-1 px-3 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none text-sm"
+                className="flex-1 px-3 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none text-sm"
               />
-              <button className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium text-sm transition-colors">
+              <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium text-sm transition-colors">
                 Add
               </button>
             </div>
@@ -610,17 +610,17 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
                 <input
                   type="text"
                   defaultValue="Your Law Firm"
-                  className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-purple-400/50 focus:outline-none"
+                  className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-blue-400/50 focus:outline-none"
                 />
               </div>
               <div>
                 <label className="block text-white/70 text-sm font-medium mb-2">Default State</label>
-                <select className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-purple-400/50 focus:outline-none">
+                <select className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-blue-400/50 focus:outline-none">
                   <option>Texas</option>
                   <option>Florida</option>
                 </select>
               </div>
-              <button className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors">
+              <button className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
                 Save Settings
               </button>
             </div>
@@ -637,7 +637,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
               value={newUserName}
               onChange={(e) => setNewUserName(e.target.value)}
               placeholder="John Doe"
-              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none"
+              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none"
             />
           </div>
 
@@ -648,7 +648,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
               placeholder="john@injuryflow.com"
-              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none"
+              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none"
             />
           </div>
 
@@ -657,7 +657,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
             <select
               value={newUserRole}
               onChange={(e) => setNewUserRole(e.target.value as any)}
-              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-purple-400/50 focus:outline-none"
+              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-blue-400/50 focus:outline-none"
             >
               <option value="case_manager">Case Manager</option>
               <option value="medical_manager">Medical Manager</option>
@@ -668,7 +668,7 @@ const AdminPage: React.FC<AdminClientProps> = ({ users: initialUsers, cases: moc
 
           <button
             onClick={handleAddUser}
-            className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
+            className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
           >
             Add User
           </button>

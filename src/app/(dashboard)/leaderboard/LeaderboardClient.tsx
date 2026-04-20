@@ -94,7 +94,7 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
             onClick={() => setTimePeriod(period)}
             className={`px-4 py-2 rounded-lg font-semibold transition-all ${
               timePeriod === period
-                ? 'bg-purple-400 text-navy'
+                ? 'bg-blue-400 text-navy'
                 : 'bg-white/10 text-white hover:bg-white/20'
             }`}
           >
@@ -127,14 +127,14 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
             {/* 1st Place - Taller with Glow */}
             {topThree[0] && (
               <div className="space-y-3">
-                <div className="bg-gradient-to-b from-purple-500/20 via-purple-500/10 to-white/0 rounded-t-2xl p-6 border-2 border-purple-400 h-56 flex flex-col items-center justify-end shadow-2xl shadow-purple-500/30">
+                <div className="bg-gradient-to-b from-blue-500/20 via-blue-500/10 to-white/0 rounded-t-2xl p-6 border-2 border-blue-400 h-56 flex flex-col items-center justify-end shadow-2xl shadow-blue-500/30">
                   <Avatar name={topThree[0].user_name} src={topThree[0].avatar} size="lg" />
                   <p className="text-3xl mt-3">{getMedal(0)}</p>
                 </div>
                 <div className="text-center">
                   <p className="font-bold text-white text-lg">{topThree[0].user_name}</p>
                   <p className="text-sm text-white/60">{topThree[0].cases_closed} cases</p>
-                  <p className="text-xl font-bold text-purple-400">{topThree[0].xp.toLocaleString()} XP</p>
+                  <p className="text-xl font-bold text-blue-400">{topThree[0].xp.toLocaleString()} XP</p>
                 </div>
               </div>
             )}
@@ -182,14 +182,14 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
                       key={entry.user_id}
                       className={`border-b border-white/5 transition-colors ${
                         isCurrentUser
-                          ? 'bg-purple-400/20 hover:bg-purple-400/30'
+                          ? 'bg-blue-400/20 hover:bg-blue-400/30'
                           : index % 2 === 0
                             ? 'bg-navy-50/30 hover:bg-navy-50/50'
                             : 'hover:bg-navy-50/30'
                       }`}
                     >
                       <td className="py-4 px-4">
-                        <span className="text-lg font-bold text-purple-400">#{index + 1}</span>
+                        <span className="text-lg font-bold text-blue-400">#{index + 1}</span>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
@@ -205,7 +205,7 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
                           <span className="font-semibold text-white">{entry.xp.toLocaleString()}</span>
                           <ProgressBar
                             value={getProgressPercent(entry.xp, entry.level)}
-                            color="purple"
+                            color="blue"
                             size="sm"
                             className="w-16"
                           />
@@ -272,7 +272,7 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
           {/* Current Level Display */}
           <div className="text-center space-y-2">
             <p className="text-white/70 text-sm">Current Level</p>
-            <p className="text-5xl font-bold text-purple-400">4</p>
+            <p className="text-5xl font-bold text-blue-400">4</p>
             <p className="text-lg text-white font-semibold">Partner Track</p>
           </div>
 
@@ -285,17 +285,17 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
                   key={level.level}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     isCurrentOrPast
-                      ? 'border-purple-400 bg-purple-500/10'
+                      ? 'border-blue-400 bg-blue-500/10'
                       : 'border-white/10 bg-white/5'
                   }`}
                 >
-                  <p className={`text-sm font-semibold ${isCurrentOrPast ? 'text-purple-400' : 'text-white/70'}`}>
+                  <p className={`text-sm font-semibold ${isCurrentOrPast ? 'text-blue-400' : 'text-white/70'}`}>
                     Level {level.level}
                   </p>
                   <p className={`text-xs mt-1 ${isCurrentOrPast ? 'text-white' : 'text-white/50'}`}>
                     {level.name}
                   </p>
-                  <p className={`text-xs mt-2 ${isCurrentOrPast ? 'text-purple-300' : 'text-white/40'}`}>
+                  <p className={`text-xs mt-2 ${isCurrentOrPast ? 'text-blue-300' : 'text-white/40'}`}>
                     {level.xp_required.toLocaleString()} XP
                   </p>
                 </div>
@@ -307,7 +307,7 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
           <div className="bg-white/5 rounded-lg p-4 text-center">
             <p className="text-white/70 text-sm mb-2">Progress to Next Level</p>
             <p className="text-2xl font-bold text-teal-400">{getXpToNextLevel(8500, 4).toLocaleString()} XP</p>
-            <ProgressBar value={getProgressPercent(8500, 4)} color="purple" size="md" className="mt-3" />
+            <ProgressBar value={getProgressPercent(8500, 4)} color="blue" size="md" className="mt-3" />
           </div>
         </div>
       </Card>
@@ -333,7 +333,7 @@ const LeaderboardPage: React.FC<LeaderboardProps> = ({
                 <div key={entry.user_id} className="space-y-2">
                   <Avatar name={entry.user_name} src={entry.avatar} size="md" />
                   <p className="text-xs font-semibold text-white text-center">{entry.user_name}</p>
-                  <p className="text-sm font-bold text-purple-400 text-center">{entry.cases_closed}</p>
+                  <p className="text-sm font-bold text-blue-400 text-center">{entry.cases_closed}</p>
                 </div>
               ))}
             </div>

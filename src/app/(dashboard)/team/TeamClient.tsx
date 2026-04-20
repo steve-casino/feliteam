@@ -205,7 +205,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
 
   const getPostTypeColor = (type: PostType) => {
     const colors = {
-      announcement: 'bg-purple-500/20 text-purple-400',
+      announcement: 'bg-blue-500/20 text-blue-400',
       celebration: 'bg-teal-500/20 text-teal-400',
       shoutout: 'bg-amber-500/20 text-amber-400',
       poll: 'bg-blue-500/20 text-blue-400'
@@ -237,7 +237,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-3 font-medium transition-colors border-b-2 ${
               activeTab === tab
-                ? 'border-purple-400 text-purple-400'
+                ? 'border-blue-400 text-blue-400'
                 : 'border-transparent text-white/50 hover:text-white/70'
             }`}
           >
@@ -257,7 +257,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
                 placeholder="Share an update, celebrate a win, or give a shoutout..."
-                className="w-full px-4 py-3 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none resize-none"
+                className="w-full px-4 py-3 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none resize-none"
                 rows={4}
               />
 
@@ -280,7 +280,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
                 <button
                   onClick={handlePostSubmit}
                   disabled={!postContent.trim()}
-                  className="ml-auto px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-500/50 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center gap-2 transition-colors"
+                  className="ml-auto px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center gap-2 transition-colors"
                 >
                   <Send className="w-4 h-4" />
                   Post
@@ -290,7 +290,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
           </Card>
 
           {celebrationPosts.length > 0 && (
-            <Card className="bg-gradient-to-r from-purple-500/10 to-teal-500/10 border-white/10">
+            <Card className="bg-gradient-to-r from-blue-500/10 to-teal-500/10 border-white/10">
               <div className="space-y-2">
                 <p className="text-white/70 text-sm font-medium">Recent Celebrations</p>
                 <div className="flex flex-wrap gap-2">
@@ -347,7 +347,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
                           onClick={() => handleReaction(post.id, emoji)}
                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                             hasReacted
-                              ? 'bg-purple-500/30 border border-purple-400 text-white'
+                              ? 'bg-blue-500/30 border border-blue-400 text-white'
                               : 'bg-white/5 border border-white/10 text-white/60 hover:text-white/80'
                           }`}
                         >
@@ -373,7 +373,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
                 <select
                   value={shoutoutToUser}
                   onChange={(e) => setShoutoutToUser(e.target.value)}
-                  className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-purple-400/50 focus:outline-none"
+                  className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white focus:border-blue-400/50 focus:outline-none"
                 >
                   <option value="">Select a team member...</option>
                   {mockUsers.map((user) => (
@@ -390,7 +390,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
                   value={shoutoutMessage}
                   onChange={(e) => setShoutoutMessage(e.target.value)}
                   placeholder="Tell them what they did great..."
-                  className="w-full px-4 py-3 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none resize-none"
+                  className="w-full px-4 py-3 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none resize-none"
                   rows={4}
                 />
               </div>
@@ -414,7 +414,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
               return (
                 <Card
                   key={shoutout.id}
-                  className="border-l-4 border-purple-400 space-y-3"
+                  className="border-l-4 border-blue-400 space-y-3"
                 >
                   <div className="flex items-center gap-2">
                     <Avatar name={fromUser?.full_name || ''} src={fromUser?.avatar_url} size="sm" />
@@ -440,7 +440,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
       {activeTab === 'huddles' && (
         <div className="space-y-6">
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors">
+            <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
               Schedule Daily Huddle
             </button>
           </div>
@@ -510,7 +510,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
                           </div>
                           <div className="w-full bg-white/5 rounded-lg h-2 overflow-hidden group-hover:bg-white/10 transition-colors">
                             <div
-                              className="h-full bg-gradient-to-r from-purple-500 to-teal-500 transition-all duration-300"
+                              className="h-full bg-gradient-to-r from-blue-500 to-teal-500 transition-all duration-300"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
@@ -534,7 +534,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
               value={pollQuestion}
               onChange={(e) => setPollQuestion(e.target.value)}
               placeholder="What do you want to ask?"
-              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none"
+              className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none"
             />
           </div>
 
@@ -551,7 +551,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ users, posts: initialPosts, current
                   setPollOptions(newOptions)
                 }}
                 placeholder={`Option ${idx + 1}`}
-                className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/50 focus:outline-none"
+                className="w-full px-4 py-2 bg-navy rounded-lg border border-white/10 text-white placeholder:text-white/40 focus:border-blue-400/50 focus:outline-none"
               />
             ))}
           </div>

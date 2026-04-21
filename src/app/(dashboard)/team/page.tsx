@@ -7,7 +7,7 @@ import Card from '@/components/ui/Card'
 import Avatar from '@/components/ui/Avatar'
 import Modal from '@/components/ui/Modal'
 import VideoRoom from '@/components/team/VideoRoom'
-import { mockTeamPosts, mockUsers, mockCases } from '@/lib/mock-data'
+import { mockTeamPosts, mockUsers } from '@/lib/mock-data'
 import { useTranslation } from '@/hooks/useLanguage'
 
 type TabType = 'feed' | 'shoutouts' | 'huddles' | 'meetings'

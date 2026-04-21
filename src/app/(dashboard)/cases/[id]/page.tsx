@@ -3,7 +3,8 @@
 import React, { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { mockCases, mockUsers, mockCaseNotes } from '@/lib/mock-data'
+import { mockUsers, mockCaseNotes } from '@/lib/mock-data'
+import { useCaseStore } from '@/lib/case-store'
 import { CaseStage } from '@/types'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -31,7 +32,8 @@ const CaseDetailPage: React.FC = () => {
   const params = useParams()
 
   const caseId = params.id as string
-  const caseObj = mockCases.find((c) => c.id === caseId)
+  const allCases = useCaseStore((state) => state.cases)
+  const caseObj = allCases.find((c) => c.id === caseId)
   const caseNotes = mockCaseNotes.filter((n) => n.case_id === caseId)
 
   // State

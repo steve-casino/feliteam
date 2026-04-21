@@ -2,7 +2,8 @@
 
 import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { mockCases, mockUsers } from '@/lib/mock-data'
+import { mockUsers } from '@/lib/mock-data'
+import { useCaseStore } from '@/lib/case-store'
 import { Case } from '@/types'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -25,6 +26,8 @@ type ViewMode = 'grid' | 'list'
 type SortBy = 'case_number' | 'date' | 'stage' | 'urgency'
 
 const CasesPage: React.FC = () => {
+  const mockCases = useCaseStore((state) => state.cases)
+
   // State
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [searchTerm, setSearchTerm] = useState('')

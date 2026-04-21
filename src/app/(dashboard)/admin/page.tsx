@@ -20,7 +20,8 @@ import { Plus, Edit2, Trash2, ToggleLeft } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Avatar from '@/components/ui/Avatar'
 import Modal from '@/components/ui/Modal'
-import { mockCases, mockUsers } from '@/lib/mock-data'
+import { mockUsers } from '@/lib/mock-data'
+import { useCaseStore } from '@/lib/case-store'
 import { useTranslation } from '@/hooks/useLanguage'
 
 const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
@@ -76,6 +77,7 @@ interface ManagerStats {
 
 const AdminPage: React.FC = () => {
   const { t } = useTranslation()
+  const mockCases = useCaseStore((state) => state.cases)
   const [activeTab, setActiveTab] = useState<AdminTab>('analytics')
   const [users, setUsers] = useState<AdminUser[]>(
     mockUsers.map((u) => ({ ...u, active: true }))

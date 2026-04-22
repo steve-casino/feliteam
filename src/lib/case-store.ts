@@ -1,25 +1,39 @@
-'use client'
-
-import { create } from 'zustand'
 import { Case } from '@/types'
 import { mockCases as initialCases } from './mock-data'
 
-interface CaseStore {
-  cases: Case[]
-  addCase: (newCase: Case) => void
-  updateCase: (id: string, updates: Partial<Case>) => void
+// Mutable case list — works across client components without zustand re-render issues
+let _cases: Case[] = [...initialCases]
+
+// Listeners for React components that need to re-render when cases change
+type Listener = () => void
+const _listeners = new Set<Listener>()
+
+export function getCases(): Case[] {
+  return _cases
 }
 
-export const useCaseStore = create<CaseStore>((set) => ({
-  cases: [...initialCases],
-  addCase: (newCase) =>
-    set((state) => ({
-      cases: [newCase, ...state.cases],
-    })),
-  updateCase: (id, updates) =>
-    set((state) => ({
-      cases: state.cases.map((c) =>
-        c.id === id ? { ...c, ...updates } : c
-      ),
-    })),
-}))
+export function addCase(newCase: Case): void {
+  _cases = [newCase, ..._cases]
+  _listeners.forEach((fn) => fn())
+}
+
+export function updateCase(id: string, updates: Partial<Case>): void {
+  _cases = _cases.map((c) => (c.id === id ? { ...c, ...updates } : c))
+  _listeners.forEach((fn) => fn())
+}
+
+export function subscribe(listener: Listener): () => void {
+  _listeners.add(listener)
+  return () => _listeners.delete(listener)
+}
+
+// React hook that subscribes to case changes
+import { useSyncExternalStore } from 'react'
+
+export function useCases(): Case[] {
+  return useSyncExternalStore(
+    subscribe,
+    () => _cases,
+    () => _cases
+  )
+}

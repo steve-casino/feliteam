@@ -8,8 +8,7 @@ import ProgressBar from '@/components/ui/ProgressBar'
 import XPDisplay from '@/components/ui/XPDisplay'
 import Badge from '@/components/ui/Badge'
 import Avatar from '@/components/ui/Avatar'
-import { mockUsers, mockChecklistItems } from '@/lib/mock-data'
-import { useCaseStore } from '@/lib/case-store'
+import { mockCases, mockUsers, mockChecklistItems } from '@/lib/mock-data'
 import { useTranslation } from '@/hooks/useLanguage'
 
 interface QuickActionModal {
@@ -59,7 +58,6 @@ const DashboardPage: React.FC = () => {
   const [modalData, setModalData] = useState<QuickActionModal>({ type: null })
 
   const currentUser = mockUsers[0]
-  const mockCases = useCaseStore((state) => state.cases)
   const userCases = mockCases.filter((c) => c.assigned_case_manager_id === currentUser.id)
   const userChecklistItems = mockChecklistItems.filter((item) => item.case_manager_id === currentUser.id)
 

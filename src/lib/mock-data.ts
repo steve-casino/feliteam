@@ -651,6 +651,11 @@ export const mockLeaderboardEntries: LeaderboardEntry[] = [
   }
 ]
 
+// Add a new case to the mock data (mutates the array in place)
+export function addNewCase(newCase: Case) {
+  mockCases.unshift(newCase)
+}
+
 // Helper function to get mock data
 export function getMockData() {
   return {

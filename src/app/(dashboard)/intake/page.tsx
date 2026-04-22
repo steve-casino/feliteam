@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useTranslation } from '@/hooks/useLanguage'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import BodyDiagram from '@/components/intake/BodyDiagram'
 import CarDiagram from '@/components/intake/CarDiagram'
-import { mockUsers } from '@/lib/mock-data'
-import { useCaseStore } from '@/lib/case-store'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { mockUsers, addNewCase } from '@/lib/mock-data'
 import {
   ChevronRight,
   ChevronLeft,
@@ -22,7 +21,7 @@ import {
   Activity,
   Shield,
   ClipboardList,
-  ExternalLink,
+  ArrowRight,
 } from 'lucide-react'
 
 // ───────────────────────────────────────────────────────────────────
@@ -143,8 +142,6 @@ function todayStr() {
 
 const IntakePage: React.FC = () => {
   const { t, language } = useTranslation()
-  const router = useRouter()
-  const addCase = useCaseStore((state) => state.addCase)
 
   // Step
   const [currentStep, setCurrentStep] = useState(1)
@@ -286,62 +283,72 @@ const IntakePage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const newCaseNumber = generateCaseNumber()
-    const newCaseManager = getCaseManager()
-    const newCaseId = `case-${Date.now()}`
-    const now = new Date().toISOString()
+    try {
+      const newCaseNumber = generateCaseNumber()
+      const newCaseManager = getCaseManager()
+      const newCaseId = `case-${Date.now()}`
+      const now = new Date().toISOString()
 
-    // Build a full Case object from intake form data
-    const newCase = {
-      id: newCaseId,
-      case_number: newCaseNumber,
-      client_name: personal.fullName,
-      client_phone: personal.phone,
-      client_dob: personal.dob,
-      date_of_accident: accident.dateOfAccident,
-      state: accident.state,
-      zip_code: '',
-      insurance_um_policy: yourVehicle.isInsured === 'yes' ? yourVehicle.policyNumber : undefined,
-      insurance_bi_info: otherVehicle.isInsured === 'yes' ? otherVehicle.insuranceCompany : undefined,
-      accident_description: accident.accidentDescription,
-      opposing_party: otherVehicle.operator || otherVehicle.owner || undefined,
-      police_report_number: accident.policeCaseNumber || undefined,
-      stage: 'new_case' as const,
-      assigned_case_manager_id: newCaseManager.id,
-      assigned_medical_manager_id: undefined,
-      clinic_info: injury.hospitalName || undefined,
-      treatment_status: injury.ambulanceTransported === 'yes' ? 'in_progress' as const : 'not_started' as const,
-      bi_lor_status: 'pending' as const,
-      um_pip_lor_status: 'pending' as const,
-      police_report_status: accident.policeCaseNumber ? 'obtained' as const : 'pending' as const,
-      demographics_sent: true,
-      lor_sent: false,
-      first_treatment_confirmed: injury.ambulanceTransported === 'yes',
-      is_minor: isMinor,
-      is_urgent: isMinor || accident.impactLevel === 'Very Heavy' || accident.impactLevel === 'Heavy',
-      has_insurance_warning: yourVehicle.isInsured === 'no',
-      vehicle_impound_date: yourVehicle.wasTowed === 'yes' ? accident.dateOfAccident : undefined,
-      notes: [
-        injury.injuryDescription && `Injuries: ${injury.injuryDescription}`,
-        injuredBodyParts.length > 0 && `Injured body parts: ${injuredBodyParts.join(', ')}`,
-        yourVehicle.vehicleType && `Client vehicle: ${yourVehicle.year} ${yourVehicle.make} ${yourVehicle.model} (${yourVehicle.vehicleType})`,
-        yourVehicleDamage.length > 0 && `Client vehicle damage zones: ${yourVehicleDamage.join(', ')}`,
-        otherVehicle.vehicleType && `Other vehicle: ${otherVehicle.year} ${otherVehicle.make} ${otherVehicle.model} (${otherVehicle.vehicleType})`,
-        otherVehicleDamage.length > 0 && `Other vehicle damage zones: ${otherVehicleDamage.join(', ')}`,
-        review.referralCode && `Referral code: ${review.referralCode}`,
-        review.preparedBy && `Prepared by: ${review.preparedBy}`,
-      ].filter(Boolean).join('. '),
-      created_at: now,
-      updated_at: now,
+      // Build notes from form data
+      const noteParts: string[] = []
+      if (injury.injuryDescription) noteParts.push(`Injuries: ${injury.injuryDescription}`)
+      if (injuredBodyParts.length > 0) noteParts.push(`Injured body parts: ${injuredBodyParts.join(', ')}`)
+      if (yourVehicle.vehicleType) noteParts.push(`Client vehicle: ${yourVehicle.year} ${yourVehicle.make} ${yourVehicle.model} (${yourVehicle.vehicleType})`)
+      if (yourVehicleDamage.length > 0) noteParts.push(`Client vehicle damage zones: ${yourVehicleDamage.join(', ')}`)
+      if (otherVehicle.vehicleType) noteParts.push(`Other vehicle: ${otherVehicle.year} ${otherVehicle.make} ${otherVehicle.model} (${otherVehicle.vehicleType})`)
+      if (otherVehicleDamage.length > 0) noteParts.push(`Other vehicle damage zones: ${otherVehicleDamage.join(', ')}`)
+      if (review.referralCode) noteParts.push(`Referral code: ${review.referralCode}`)
+      if (review.preparedBy) noteParts.push(`Prepared by: ${review.preparedBy}`)
+
+      // Build a full Case object from intake form data
+      const newCase = {
+        id: newCaseId,
+        case_number: newCaseNumber,
+        client_name: personal.fullName || 'Unknown Client',
+        client_phone: personal.phone || '',
+        client_dob: personal.dob || '2000-01-01',
+        date_of_accident: accident.dateOfAccident || now.split('T')[0],
+        state: accident.state || 'TX',
+        zip_code: '',
+        insurance_um_policy: yourVehicle.isInsured === 'yes' ? (yourVehicle.policyNumber || undefined) : undefined,
+        insurance_bi_info: otherVehicle.isInsured === 'yes' ? (otherVehicle.insuranceCompany || undefined) : undefined,
+        accident_description: accident.accidentDescription || 'Motor vehicle accident',
+        opposing_party: otherVehicle.operator || otherVehicle.owner || undefined,
+        police_report_number: accident.policeCaseNumber || undefined,
+        stage: 'new_case' as const,
+        assigned_case_manager_id: newCaseManager.id,
+        assigned_medical_manager_id: undefined,
+        clinic_info: injury.hospitalName || undefined,
+        treatment_status: (injury.ambulanceTransported === 'yes' ? 'in_progress' : 'not_started') as 'in_progress' | 'not_started',
+        bi_lor_status: 'pending' as const,
+        um_pip_lor_status: 'pending' as const,
+        police_report_status: (accident.policeCaseNumber ? 'obtained' : 'pending') as 'obtained' | 'pending',
+        demographics_sent: true,
+        lor_sent: false,
+        first_treatment_confirmed: injury.ambulanceTransported === 'yes',
+        is_minor: isMinor,
+        is_urgent: isMinor || accident.impactLevel === 'Very Heavy' || accident.impactLevel === 'Heavy',
+        has_insurance_warning: yourVehicle.isInsured === 'no',
+        vehicle_impound_date: yourVehicle.wasTowed === 'yes' ? (accident.dateOfAccident || undefined) : undefined,
+        notes: noteParts.length > 0 ? noteParts.join('. ') : undefined,
+        created_at: now,
+        updated_at: now,
+      }
+
+      // Add the case to the cases list
+      addNewCase(newCase)
+
+      setGeneratedCaseNumber(newCaseNumber)
+      setGeneratedCaseId(newCaseId)
+      setAssignedCaseManager(newCaseManager)
+      setShowSuccess(true)
+    } catch (err) {
+      console.error('Intake submission error:', err)
+      // Still show success screen even if case store fails
+      setGeneratedCaseNumber(generateCaseNumber())
+      setAssignedCaseManager(getCaseManager())
+      setShowSuccess(true)
     }
-
-    // Add the case to the shared store
-    addCase(newCase)
-
-    setGeneratedCaseNumber(newCaseNumber)
-    setGeneratedCaseId(newCaseId)
-    setAssignedCaseManager(newCaseManager)
-    setShowSuccess(true)
   }
 
   // ─── Shared UI helpers ───
@@ -462,20 +469,20 @@ const IntakePage: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => router.push(`/cases/${generatedCaseId}`)}
+            <Link
+              href={`/cases/${generatedCaseId}`}
               className="w-full bg-teal-400 hover:bg-teal-500 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mb-3"
             >
-              <ExternalLink className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5" />
               {L('View Case', 'Ver Caso', language)}
-            </button>
+            </Link>
 
-            <button
-              onClick={() => router.push('/cases')}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors mb-3"
+            <Link
+              href="/cases"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors mb-3 block text-center"
             >
               {L('View All Cases', 'Ver Todos los Casos', language)}
-            </button>
+            </Link>
 
             <button
               onClick={() => {

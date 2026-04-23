@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 // Routes that are temporarily disabled. Any request to these paths (or
 // subpaths) gets redirected to /intake. Keep this list in sync with the
 // `disabled: true` flags in src/components/layout/Sidebar.tsx.
-const DISABLED_ROUTES = ['/dashboard', '/team', '/leaderboard']
+const DISABLED_ROUTES = ['/dashboard', '/cases', '/team', '/leaderboard']
 
 // Testing mode: no auth required. Middleware passes most requests through,
 // but rewrites disabled section URLs so typing them into the address bar

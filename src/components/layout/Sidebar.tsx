@@ -33,14 +33,28 @@ type NavItem = {
   href: string
   icon: typeof LayoutDashboard
   disabled?: boolean
+  adminOnly?: boolean
 }
 
-// NOTE: `disabled: true` temporarily greys out a section and makes it
-// unclickable in the sidebar. The route itself is also redirected to /intake
-// via middleware.ts so direct URL access also lands on Intake. To re-enable a
-// section, just remove the `disabled: true` flag here and the matching entry
-// in middleware.ts.
+// Sidebar order: Intake is the primary active section, Admin comes right
+// below it, then the temporarily-disabled sections are grouped at the bottom.
+//
+// `disabled: true` greys a section out and makes it unclickable. The route
+// itself is also redirected to /intake via middleware.ts so typing the URL
+// still lands on Intake. To re-enable a section, remove the flag here AND
+// drop the matching path from DISABLED_ROUTES in middleware.ts.
 const navItems: NavItem[] = [
+  {
+    label: 'Intake',
+    href: '/intake',
+    icon: UserPlus
+  },
+  {
+    label: 'Admin',
+    href: '/admin',
+    icon: Settings,
+    adminOnly: true
+  },
   {
     label: 'Dashboard',
     href: '/dashboard',
@@ -50,12 +64,8 @@ const navItems: NavItem[] = [
   {
     label: 'Cases',
     href: '/cases',
-    icon: Briefcase
-  },
-  {
-    label: 'Intake',
-    href: '/intake',
-    icon: UserPlus
+    icon: Briefcase,
+    disabled: true
   },
   {
     label: 'Team',
@@ -82,15 +92,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
     return pathname?.startsWith(href)
   }
 
-  const adminItems: NavItem[] = [
-    {
-      label: 'Admin',
-      href: '/admin',
-      icon: Settings
-    }
-  ]
-
-  const allNavItems = currentUser.role === 'admin' ? [...navItems, ...adminItems] : navItems
+  const allNavItems = navItems.filter(
+    (item) => !item.adminOnly || currentUser.role === 'admin'
+  )
 
   return (
     <aside

@@ -28,11 +28,24 @@ interface SidebarProps {
   notificationCount?: number
 }
 
-const navItems = [
+type NavItem = {
+  label: string
+  href: string
+  icon: typeof LayoutDashboard
+  disabled?: boolean
+}
+
+// NOTE: `disabled: true` temporarily greys out a section and makes it
+// unclickable in the sidebar. The route itself is also redirected to /intake
+// via middleware.ts so direct URL access also lands on Intake. To re-enable a
+// section, just remove the `disabled: true` flag here and the matching entry
+// in middleware.ts.
+const navItems: NavItem[] = [
   {
     label: 'Dashboard',
     href: '/dashboard',
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
+    disabled: true
   },
   {
     label: 'Cases',
@@ -47,12 +60,14 @@ const navItems = [
   {
     label: 'Team',
     href: '/team',
-    icon: Users
+    icon: Users,
+    disabled: true
   },
   {
     label: 'Leaderboard',
     href: '/leaderboard',
-    icon: Trophy
+    icon: Trophy,
+    disabled: true
   }
 ]
 
@@ -67,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
     return pathname?.startsWith(href)
   }
 
-  const adminItems = [
+  const adminItems: NavItem[] = [
     {
       label: 'Admin',
       href: '/admin',
@@ -101,6 +116,33 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
         {allNavItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.href)
+
+          // Disabled items: render as a non-interactive div so they're visible
+          // but can't be clicked or focused. Tooltip indicates the section is
+          // coming soon.
+          if (item.disabled) {
+            const disabledTitle = collapsed
+              ? `${item.label} — coming soon`
+              : 'Coming soon'
+            return (
+              <div
+                key={item.href}
+                aria-disabled="true"
+                title={disabledTitle}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/30 opacity-60 cursor-not-allowed select-none"
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && (
+                  <span className="text-sm font-medium flex-1">{item.label}</span>
+                )}
+                {!collapsed && (
+                  <span className="text-[10px] uppercase tracking-wide text-white/40 border border-white/10 rounded px-1.5 py-0.5">
+                    Soon
+                  </span>
+                )}
+              </div>
+            )
+          }
 
           return (
             <Link

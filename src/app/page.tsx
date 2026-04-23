@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
 export default function Home() {
-  redirect('/dashboard')
+  // Dashboard is temporarily disabled — land on Intake instead.
+  redirect('/intake')
 }

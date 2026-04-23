@@ -199,6 +199,20 @@ const IntakePage: React.FC = () => {
     return age < 18
   }, [personal.dob])
 
+  // NOTE: These useMemos were originally declared down near renderStep6. Because
+  // the success-screen early-return at `if (showSuccess)` runs BEFORE that point,
+  // the hook count differed between renders (pre-submit vs post-submit), and
+  // React threw "Rendered fewer hooks than expected" — which the error boundary
+  // surfaced as "Something went wrong." Keep these hooks at the top level.
+  const previewCaseNumber = useMemo(
+    () => Math.floor(100000 + Math.random() * 900000).toString(),
+    []
+  )
+  const previewCaseManager = useMemo(() => {
+    const cms = mockUsers.filter(u => u.role === 'case_manager')
+    return cms.length > 0 ? cms.reduce((a, b) => a.xp_points <= b.xp_points ? a : b) : mockUsers[0]
+  }, [])
+
   const noPoliceReport = !accident.policeCaseNumber.trim()
   const missingInsurance = yourVehicle.isInsured === 'no' || (!yourVehicle.insuranceCompany && !yourVehicle.policyNumber && yourVehicle.isInsured !== 'yes')
 
@@ -1048,11 +1062,8 @@ const IntakePage: React.FC = () => {
   // STEP 6: REVIEW & SUBMIT
   // ───────────────────────────────────────────────────────────────
 
-  const caseNumber = useMemo(() => Math.floor(100000 + Math.random() * 900000).toString(), [])
-  const caseManager = useMemo(() => {
-    const cms = mockUsers.filter(u => u.role === 'case_manager')
-    return cms.length > 0 ? cms.reduce((a, b) => a.xp_points <= b.xp_points ? a : b) : mockUsers[0]
-  }, [])
+  const caseNumber = previewCaseNumber
+  const caseManager = previewCaseManager
 
   const reviewField = (label: string, value: string) => (
     <div>

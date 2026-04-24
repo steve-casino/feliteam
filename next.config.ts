@@ -16,12 +16,11 @@ const nextConfig: NextConfig = {
 
   // Compress static assets
   compress: true,
-
-  // Environment variable exposure
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  },
+  // NOTE: we do NOT map NEXT_PUBLIC_* vars in an `env:` block here —
+  // Next.js auto-exposes any NEXT_PUBLIC_* env var to the client bundle.
+  // An explicit mapping is redundant, and when the var is undefined at
+  // config-evaluation time it hard-bakes `undefined` into the bundle and
+  // overrides whatever `.env.local` supplies.
 };
 
 export default nextConfig;

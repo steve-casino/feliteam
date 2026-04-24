@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS case_notes (
   type note_type DEFAULT 'note',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
+-- 
 -- Checklist items table
 CREATE TABLE IF NOT EXISTS checklist_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

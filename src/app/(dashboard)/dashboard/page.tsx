@@ -8,6 +8,7 @@ import ProgressBar from '@/components/ui/ProgressBar'
 import XPDisplay from '@/components/ui/XPDisplay'
 import Badge from '@/components/ui/Badge'
 import Avatar from '@/components/ui/Avatar'
+import OpportunitiesFeed from '@/components/dashboard/OpportunitiesFeed'
 import { mockCases, mockUsers, mockChecklistItems } from '@/lib/mock-data'
 import { useTranslation } from '@/hooks/useLanguage'
 
@@ -158,6 +159,9 @@ const DashboardPage: React.FC = () => {
           <XPDisplay xp={currentUser.xp_points} level={currentUser.level} />
         </div>
       </div>
+
+      {/* Opportunities feed — submitted by Case Reps */}
+      <OpportunitiesFeed />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

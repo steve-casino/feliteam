@@ -1,33 +1,51 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
 import NotificationPanel from '@/components/layout/NotificationPanel'
-import { mockUsers, mockNotifications } from '@/lib/mock-data'
+import { mockNotifications } from '@/lib/mock-data'
+import { useAuthStore } from '@/lib/auth'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const router = useRouter()
+  const { session, hydrated, hydrate } = useAuthStore()
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false)
   const [notifications, setNotifications] = useState(mockNotifications)
 
-  // Use the admin user as the current user for now
-  const currentUser = mockUsers[0]
+  useEffect(() => {
+    hydrate()
+  }, [hydrate])
+
+  // Route guard. Anyone not logged in goes to the landing page; case reps
+  // don't get the dashboard shell — they live at /rep-intake.
+  useEffect(() => {
+    if (!hydrated) return
+    if (!session) {
+      router.replace('/')
+    } else if (session.role !== 'case_manager') {
+      router.replace('/rep-intake')
+    }
+  }, [hydrated, session, router])
 
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.read).length
 
   const handleMenuToggle = useCallback(() => {
-    setSidebarOpen(!sidebarOpen)
-  }, [sidebarOpen])
+    setSidebarOpen((prev) => !prev)
+  }, [])
 
   const handleNotificationClick = useCallback(() => {
-    setNotificationPanelOpen(!notificationPanelOpen)
-  }, [notificationPanelOpen])
+    setNotificationPanelOpen((prev) => !prev)
+  }, [])
 
   const handleMarkAsRead = useCallback((notificationId: string) => {
     setNotifications((prevNotifications) =>
@@ -42,6 +60,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       prevNotifications.map((n) => ({ ...n, read: true }))
     )
   }, [])
+
+  // Loading or being redirected — show a minimal shell to avoid leaking
+  // dashboard chrome to the wrong role for a flash.
+  if (!hydrated || !session || session.role !== 'case_manager') {
+    return (
+      <div className="min-h-screen bg-navy flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+      </div>
+    )
+  }
+
+  // Shape the auth session into what Sidebar expects. XP/level don't mean
+  // anything for real logins yet — feed placeholder values.
+  const currentUser = {
+    full_name: session.full_name,
+    role: session.role,
+    xp_points: 0,
+    level: 1,
+    avatar_url: undefined,
+  }
 
   return (
     <div className="min-h-screen bg-navy">

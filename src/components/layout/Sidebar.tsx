@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   Briefcase,
@@ -13,9 +13,11 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
-  Zap
+  Zap,
+  LogOut
 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
+import { signOut } from '@/lib/auth'
 
 interface SidebarProps {
   currentUser: {
@@ -36,14 +38,19 @@ type NavItem = {
   adminOnly?: boolean
 }
 
-// Sidebar order: Intake is the primary active section, Admin comes right
-// below it, then the temporarily-disabled sections are grouped at the bottom.
+// Sidebar order: Dashboard first (opportunities feed), then Intake, then
+// the temporarily-disabled sections grouped at the bottom.
 //
 // `disabled: true` greys a section out and makes it unclickable. The route
-// itself is also redirected to /intake via middleware.ts so typing the URL
-// still lands on Intake. To re-enable a section, remove the flag here AND
-// drop the matching path from DISABLED_ROUTES in middleware.ts.
+// itself is also redirected via middleware.ts so typing the URL still
+// lands on a working page. To re-enable a section, remove the flag here
+// AND drop the matching path from DISABLED_ROUTES in middleware.ts.
 const navItems: NavItem[] = [
+  {
+    label: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutDashboard
+  },
   {
     label: 'Intake',
     href: '/intake',
@@ -53,12 +60,7 @@ const navItems: NavItem[] = [
     label: 'Admin',
     href: '/admin',
     icon: Settings,
-    adminOnly: true
-  },
-  {
-    label: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
+    adminOnly: true,
     disabled: true
   },
   {
@@ -84,6 +86,12 @@ const navItems: NavItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 }) => {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await signOut()
+    router.replace('/')
+  }
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -212,6 +220,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
             </div>
           )}
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-white/60 hover:text-red-300 hover:bg-red-500/10 transition-all ${
+            collapsed ? 'justify-center' : ''
+          }`}
+          title={collapsed ? 'Log out' : undefined}
+        >
+          <LogOut className="w-4 h-4 flex-shrink-0" />
+          {!collapsed && <span className="text-sm font-medium">Log out</span>}
+        </button>
       </div>
 
       {/* Collapse Toggle */}

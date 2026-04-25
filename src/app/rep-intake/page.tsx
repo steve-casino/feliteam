@@ -75,9 +75,9 @@ export default function RepIntakePage() {
   const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
-    hydrate()
+    if (!hydrated) hydrate()
     hydrateIntakes()
-  }, [hydrate, hydrateIntakes])
+  }, [hydrated, hydrate, hydrateIntakes])
 
   useEffect(() => {
     if (!hydrated) return
@@ -103,7 +103,10 @@ export default function RepIntakePage() {
     return form.ssn.length > 4 ? '***-**-' + form.ssn.slice(-4) : form.ssn
   }, [form.ssn])
 
-  if (!hydrated || !session || session.role !== 'case_rep') {
+  // Render as soon as we have a rep session, even if `hydrated` hasn't
+  // flipped yet — avoids a long blank spinner on cold loads.
+  const isRepSession = session?.role === 'case_rep'
+  if (!isRepSession) {
     return (
       <div className="min-h-screen bg-navy flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />

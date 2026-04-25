@@ -102,7 +102,14 @@ function shapeSession(
   supaSession: SupabaseSession,
   profile: { full_name: string; role: DbRole; email: string; created_at: string } | null
 ): Session {
-  const appRole = dbToAppRole(profile?.role)
+  // Role-resolution order:
+  //   1. profile row (authoritative once it exists)
+  //   2. signup metadata in supaSession.user.user_metadata.role
+  //   3. fallback: case_rep
+  // We need (2) so the layout can render quickly without waiting for
+  // the public.users row to come back from the DB.
+  const metaRole = (supaSession.user.user_metadata?.role as string | undefined) ?? null
+  const appRole = dbToAppRole(profile?.role ?? metaRole)
   return {
     id: supaSession.user.id,
     email: profile?.email ?? supaSession.user.email ?? '',
@@ -133,6 +140,17 @@ export const useAuthStore = create<AuthStore>((set) => ({
   session: null,
   hydrated: false,
   hydrate: async () => {
+    // Hard timeout: never let the loading spinner outlive 5 seconds, even
+    // if Supabase / the network hangs. The session can populate later via
+    // the onAuthStateChange listener; we just shouldn't BLOCK the UI on it.
+    const timeout = setTimeout(() => {
+      const s = useAuthStore.getState()
+      if (!s.hydrated) {
+        console.warn('[auth] hydrate timed out after 5s; releasing UI')
+        set({ hydrated: true })
+      }
+    }, 5000)
+
     try {
       const supabase = getSupabase()
 
@@ -143,32 +161,55 @@ export const useAuthStore = create<AuthStore>((set) => ({
           async (_event: AuthChangeEvent, supaSession: SupabaseSession | null) => {
             if (!supaSession) {
               clearRoleCookie()
-              set({ session: null })
+              set({ session: null, hydrated: true })
               return
             }
-            const profile = await fetchProfile(supaSession.user.id)
-            const shaped = shapeSession(supaSession, profile)
-            setRoleCookie(shaped.role)
-            set({ session: shaped })
+            try {
+              const profile = await fetchProfile(supaSession.user.id)
+              const shaped = shapeSession(supaSession, profile)
+              setRoleCookie(shaped.role)
+              set({ session: shaped, hydrated: true })
+            } catch {
+              // Even if profile fetch fails, surface SOMETHING to the UI
+              // so it doesn't sit on a spinner.
+              const shaped = shapeSession(supaSession, null)
+              setRoleCookie(shaped.role)
+              set({ session: shaped, hydrated: true })
+            }
           }
         )
       }
 
       const { data } = await supabase.auth.getSession()
       if (data.session) {
-        const profile = await fetchProfile(data.session.user.id)
-        const shaped = shapeSession(data.session, profile)
-        setRoleCookie(shaped.role)
-        set({ session: shaped, hydrated: true })
+        // Don't block on the profile fetch — shape immediately from the
+        // Supabase session (which has user_metadata.role from signup) so
+        // the dashboard can render, and refine asynchronously when the
+        // profile lands.
+        const optimistic = shapeSession(data.session, null)
+        setRoleCookie(optimistic.role)
+        set({ session: optimistic, hydrated: true })
+
+        try {
+          const profile = await fetchProfile(data.session.user.id)
+          if (profile) {
+            const refined = shapeSession(data.session, profile)
+            setRoleCookie(refined.role)
+            set({ session: refined })
+          }
+        } catch (err) {
+          console.warn('[auth] profile refine failed (non-blocking):', err)
+        }
         return
       }
       clearRoleCookie()
       set({ session: null, hydrated: true })
     } catch (err) {
-      // Most likely: Supabase env isn't set. Surface to console and leave
-      // the user logged out so the landing page still renders.
+      // Most likely: Supabase env / network. Always release the UI.
       console.error('[auth] hydrate failed:', err)
       set({ session: null, hydrated: true })
+    } finally {
+      clearTimeout(timeout)
     }
   },
   _setSession: (session) => {

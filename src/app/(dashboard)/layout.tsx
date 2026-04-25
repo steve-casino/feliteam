@@ -22,11 +22,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [notifications, setNotifications] = useState(mockNotifications)
 
   useEffect(() => {
-    hydrate()
-  }, [hydrate])
+    if (!hydrated) hydrate()
+  }, [hydrated, hydrate])
 
-  // Route guard. Anyone not logged in goes to the landing page; case reps
-  // don't get the dashboard shell — they live at /rep-intake.
+  // Route guard. Wait until hydration finishes before deciding to redirect,
+  // otherwise we flash-redirect away from a logged-in user.
   useEffect(() => {
     if (!hydrated) return
     if (!session) {
@@ -61,9 +61,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     )
   }, [])
 
-  // Loading or being redirected — show a minimal shell to avoid leaking
-  // dashboard chrome to the wrong role for a flash.
-  if (!hydrated || !session || session.role !== 'case_manager') {
+  // Render the dashboard the moment we have a Manager session, even if
+  // `hydrated` hasn't flipped yet (it does so a few hundred ms after
+  // navigation in the worst case). Only show the loading shell when we
+  // genuinely have no session to render with.
+  const isManagerSession = session?.role === 'case_manager'
+  if (!isManagerSession) {
+    // No session yet, or wrong role: keep the loader brief; the route
+    // guard above will redirect once hydrated.
     return (
       <div className="min-h-screen bg-navy flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />

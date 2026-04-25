@@ -119,8 +119,20 @@ export const useIntakeStore = create<IntakeStore>((set, get) => ({
   error: null,
 
   hydrate: async () => {
+    // Already loading? Don't kick off another one, but don't BLOCK either.
     if (get().loading) return
     set({ loading: true, error: null })
+
+    // Hard timeout so a stuck network call can't leave us pinned to
+    // `loading: true` (which would also pin `hydrated: false`).
+    const timeout = setTimeout(() => {
+      const s = get()
+      if (s.loading) {
+        console.warn('[intakes] hydrate timed out after 8s; releasing UI')
+        set({ loading: false, hydrated: true, error: 'Timed out loading intakes — try refresh.' })
+      }
+    }, 8000)
+
     try {
       const supabase = getSupabase()
       const { data, error } = await supabase
@@ -175,6 +187,8 @@ export const useIntakeStore = create<IntakeStore>((set, get) => ({
         hydrated: true,
         error: err instanceof Error ? err.message : 'Failed to load intakes',
       })
+    } finally {
+      clearTimeout(timeout)
     }
   },
 

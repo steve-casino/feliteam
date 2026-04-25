@@ -15,7 +15,9 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const router = useRouter()
-  const { session, hydrated, hydrate } = useAuthStore()
+  const session = useAuthStore((s) => s.session)
+  const hydrated = useAuthStore((s) => s.hydrated)
+  const hydrate = useAuthStore((s) => s.hydrate)
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false)

@@ -71,7 +71,10 @@ function presetRange(preset: DatePreset): { from: Date | null; to: Date | null }
 }
 
 export default function IntakesBoard() {
-  const { intakes, hydrate, hydrated, error } = useIntakeStore()
+  const intakes = useIntakeStore((s) => s.intakes)
+  const hydrate = useIntakeStore((s) => s.hydrate)
+  const hydrated = useIntakeStore((s) => s.hydrated)
+  const error = useIntakeStore((s) => s.error)
   const [activeStatus, setActiveStatus] = useState<IntakeStatus>('not_signed')
   const [preset, setPreset] = useState<DatePreset>('30d')
   const [customFrom, setCustomFrom] = useState('')

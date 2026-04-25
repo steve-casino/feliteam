@@ -94,8 +94,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
   const pathname = usePathname()
   const router = useRouter()
 
-  const handleLogout = async () => {
-    await signOut()
+  const handleLogout = () => {
+    // signOut() clears local state synchronously and fires the network
+    // call in the background. We can navigate immediately — no need to
+    // make the user wait for Supabase to confirm.
+    void signOut()
     router.replace('/')
   }
 

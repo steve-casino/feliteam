@@ -29,7 +29,9 @@ import {
 type Range = 'upcoming' | 'past' | 'all'
 
 export default function CalendarPage() {
-  const { intakes, hydrate, hydrated } = useIntakeStore()
+  const intakes = useIntakeStore((s) => s.intakes)
+  const hydrate = useIntakeStore((s) => s.hydrate)
+  const hydrated = useIntakeStore((s) => s.hydrated)
   const [range, setRange] = useState<Range>('upcoming')
 
   useEffect(() => {

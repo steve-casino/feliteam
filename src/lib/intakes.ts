@@ -108,9 +108,55 @@ interface IntakeStore {
   hydrate: () => Promise<void>
   refresh: () => Promise<void>
   unsubscribe: () => void
+  reset: () => void
 }
 
 let realtimeUnsub: (() => void) | null = null
+
+type StoreSet = (
+  partial:
+    | Partial<IntakeStore>
+    | ((s: IntakeStore) => Partial<IntakeStore>),
+) => void
+type StoreGet = () => IntakeStore
+
+function ensureRealtime(set: StoreSet, get: StoreGet) {
+  if (realtimeUnsub) return
+  try {
+    const supabase = getSupabase()
+    const channel = supabase
+      .channel('intakes-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'intakes' },
+        (payload: RealtimePostgresChangesPayload<Intake>) => {
+          const list = get().intakes
+          if (payload.eventType === 'INSERT' && payload.new) {
+            const incoming = payload.new as Intake
+            if (!list.some((i) => i.id === incoming.id)) {
+              set({ intakes: [incoming, ...list] })
+            }
+          } else if (payload.eventType === 'UPDATE' && payload.new) {
+            const updated = payload.new as Intake
+            set({
+              intakes: list.map((i) => (i.id === updated.id ? updated : i)),
+            })
+          } else if (payload.eventType === 'DELETE' && payload.old) {
+            const removed = payload.old as Partial<Intake>
+            set({ intakes: list.filter((i) => i.id !== removed.id) })
+          }
+        },
+      )
+      .subscribe()
+    realtimeUnsub = () => {
+      supabase.removeChannel(channel)
+      realtimeUnsub = null
+    }
+  } catch (err) {
+    // Realtime is a nice-to-have — never let its failure block anything.
+    console.warn('[intakes] realtime subscribe failed (non-blocking):', err)
+  }
+}
 
 export const useIntakeStore = create<IntakeStore>((set, get) => ({
   intakes: [],
@@ -119,19 +165,28 @@ export const useIntakeStore = create<IntakeStore>((set, get) => ({
   error: null,
 
   hydrate: async () => {
-    // Already loading? Don't kick off another one, but don't BLOCK either.
-    if (get().loading) return
+    // Already loading or already hydrated with data? No-op — avoids
+    // duplicate queries when both IntakeMetrics and IntakesBoard mount.
+    const cur = get()
+    if (cur.loading || cur.hydrated) {
+      // Make sure realtime is subscribed even if we skip the fetch.
+      ensureRealtime(set, get)
+      return
+    }
     set({ loading: true, error: null })
 
-    // Hard timeout so a stuck network call can't leave us pinned to
-    // `loading: true` (which would also pin `hydrated: false`).
+    // Hard timeout so a stuck network call can't pin `loading: true`.
     const timeout = setTimeout(() => {
       const s = get()
       if (s.loading) {
-        console.warn('[intakes] hydrate timed out after 8s; releasing UI')
-        set({ loading: false, hydrated: true, error: 'Timed out loading intakes — try refresh.' })
+        console.warn('[intakes] hydrate timed out after 6s; releasing UI')
+        set({
+          loading: false,
+          hydrated: true,
+          error: 'Timed out loading intakes — try refresh.',
+        })
       }
-    }, 8000)
+    }, 6000)
 
     try {
       const supabase = getSupabase()
@@ -145,42 +200,8 @@ export const useIntakeStore = create<IntakeStore>((set, get) => ({
         loading: false,
         hydrated: true,
       })
-
-      // Subscribe to realtime updates once.
-      if (!realtimeUnsub) {
-        const channel = supabase
-          .channel('intakes-changes')
-          .on(
-            'postgres_changes',
-            { event: '*', schema: 'public', table: 'intakes' },
-            (payload: RealtimePostgresChangesPayload<Intake>) => {
-              const list = get().intakes
-              if (payload.eventType === 'INSERT' && payload.new) {
-                const incoming = payload.new as Intake
-                if (!list.some((i) => i.id === incoming.id)) {
-                  set({ intakes: [incoming, ...list] })
-                }
-              } else if (payload.eventType === 'UPDATE' && payload.new) {
-                const updated = payload.new as Intake
-                set({
-                  intakes: list.map((i) =>
-                    i.id === updated.id ? updated : i
-                  ),
-                })
-              } else if (payload.eventType === 'DELETE' && payload.old) {
-                const removed = payload.old as Partial<Intake>
-                set({
-                  intakes: list.filter((i) => i.id !== removed.id),
-                })
-              }
-            }
-          )
-          .subscribe()
-        realtimeUnsub = () => {
-          supabase.removeChannel(channel)
-          realtimeUnsub = null
-        }
-      }
+      // Kick off realtime separately — don't block paint on websocket setup.
+      ensureRealtime(set, get)
     } catch (err) {
       set({
         loading: false,
@@ -199,6 +220,11 @@ export const useIntakeStore = create<IntakeStore>((set, get) => ({
 
   unsubscribe: () => {
     realtimeUnsub?.()
+  },
+
+  reset: () => {
+    realtimeUnsub?.()
+    set({ intakes: [], loading: false, hydrated: false, error: null })
   },
 }))
 

@@ -62,9 +62,12 @@ const emptyForm: FormState = {
 
 export default function RepIntakePage() {
   const router = useRouter()
-  const { session, hydrated, hydrate } = useAuthStore()
-  const { intakes, hydrate: hydrateIntakes, hydrated: intakesHydrated } =
-    useIntakeStore()
+  const session = useAuthStore((s) => s.session)
+  const hydrated = useAuthStore((s) => s.hydrated)
+  const hydrate = useAuthStore((s) => s.hydrate)
+  const intakes = useIntakeStore((s) => s.intakes)
+  const hydrateIntakes = useIntakeStore((s) => s.hydrate)
+  const intakesHydrated = useIntakeStore((s) => s.hydrated)
 
   const [form, setForm] = useState<FormState>(emptyForm)
   const [errors, setErrors] = useState<Set<string>>(new Set())
@@ -224,8 +227,8 @@ export default function RepIntakePage() {
     }
   }
 
-  const handleLogout = async () => {
-    await signOut()
+  const handleLogout = () => {
+    void signOut()
     router.replace('/')
   }
 

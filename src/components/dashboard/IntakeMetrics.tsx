@@ -22,7 +22,9 @@ function startOfThisMonth(): Date {
 }
 
 export default function IntakeMetrics() {
-  const { intakes, hydrate, hydrated } = useIntakeStore()
+  const intakes = useIntakeStore((s) => s.intakes)
+  const hydrate = useIntakeStore((s) => s.hydrate)
+  const hydrated = useIntakeStore((s) => s.hydrated)
 
   useEffect(() => {
     if (!hydrated) hydrate()

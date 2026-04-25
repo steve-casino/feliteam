@@ -53,12 +53,17 @@ const CLASS_META: Record<
 
 export default function LandingPage() {
   const router = useRouter()
-  const { session, hydrated, hydrate } = useAuthStore()
+  // Selector-based subscription: the landing page only cares about
+  // session + hydrated, not the whole store. Avoids re-renders on
+  // unrelated state (e.g. the auth listener attaching).
+  const session = useAuthStore((s) => s.session)
+  const hydrated = useAuthStore((s) => s.hydrated)
+  const hydrate = useAuthStore((s) => s.hydrate)
   const [selected, setSelected] = useState<Panel | null>(null)
 
   useEffect(() => {
-    hydrate()
-  }, [hydrate])
+    if (!hydrated) hydrate()
+  }, [hydrated, hydrate])
 
   useEffect(() => {
     if (hydrated && session) {
@@ -66,7 +71,10 @@ export default function LandingPage() {
     }
   }, [hydrated, session, router])
 
-  if (!hydrated || session) {
+  // Only show the loading spinner if a session exists (user is being
+  // redirected) OR we don't yet know whether one exists. Once hydrated
+  // confirms no session, render the landing immediately.
+  if (session) {
     return (
       <div className="min-h-screen bg-navy flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />

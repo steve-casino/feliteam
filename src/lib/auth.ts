@@ -77,24 +77,32 @@ function clearRoleCookie() {
 // Profile fetch helper
 // ──────────────────────────────────────────────────────────────────
 
-async function fetchProfile(userId: string): Promise<{
+type Profile = {
   full_name: string
   role: DbRole
   email: string
   created_at: string
-} | null> {
+}
+
+async function fetchProfile(userId: string, timeoutMs = 2500): Promise<Profile | null> {
   const supabase = getSupabase()
-  const { data, error } = await supabase
+  // Race the query against a timeout so a slow DB never stalls the UI.
+  const query = supabase
     .from('users')
     .select('full_name, role, email, created_at')
     .eq('id', userId)
     .maybeSingle()
-  if (error || !data) return null
-  return data as {
-    full_name: string
-    role: DbRole
-    email: string
-    created_at: string
+  try {
+    const { data, error } = (await Promise.race([
+      query,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('profile fetch timeout')), timeoutMs)
+      ),
+    ])) as { data: Profile | null; error: unknown }
+    if (error || !data) return null
+    return data
+  } catch {
+    return null
   }
 }
 
@@ -273,9 +281,9 @@ export async function signUp(params: {
       }
     }
 
-    // Auto-confirmed — fetch profile and hydrate.
-    const profile = await fetchProfile(data.session.user.id)
-    const shaped = shapeSession(data.session, profile)
+    // Optimistic shape from auth metadata — no blocking DB query. The
+    // listener / hydrate will refine in the background.
+    const shaped = shapeSession(data.session, null)
     useAuthStore.getState()._setSession(shaped)
     return { ok: true, session: shaped }
   } catch (err) {
@@ -307,12 +315,16 @@ export async function signIn(params: {
       return { ok: false, error: 'Sign-in did not return a session.' }
     }
 
-    const profile = await fetchProfile(data.session.user.id)
-    const shaped = shapeSession(data.session, profile)
+    // Shape from auth metadata first — instant, no DB call. Trust the
+    // role baked into user_metadata at signup time. We refine later via
+    // the auth listener once the profile row loads.
+    const shaped = shapeSession(data.session, null)
 
-    // Enforce the side they picked matches their real role.
+    // Cheap role assertion: did the user click the right panel?
     if (shaped.role !== role) {
-      await supabase.auth.signOut()
+      // Fire-and-forget the signOut — don't wait for it. The user is
+      // staying on the landing page anyway.
+      void supabase.auth.signOut()
       useAuthStore.getState()._setSession(null)
       const expected = shaped.role === 'case_manager' ? 'Case Manager' : 'Case Rep'
       return {
@@ -329,11 +341,22 @@ export async function signIn(params: {
 }
 
 export async function signOut(): Promise<void> {
+  // Optimistically clear local state immediately so the UI updates
+  // without waiting on the network round-trip. Then call Supabase.
+  useAuthStore.getState()._setSession(null)
+  try {
+    // Lazy-import the intake store to avoid a circular dep — we only
+    // need it during sign-out to clear cached rows.
+    const { useIntakeStore } = await import('@/lib/intakes')
+    useIntakeStore.getState().reset()
+  } catch {
+    // ignore — reset is best-effort
+  }
   try {
     const supabase = getSupabase()
     await supabase.auth.signOut()
-  } finally {
-    useAuthStore.getState()._setSession(null)
+  } catch (err) {
+    console.warn('[auth] signOut network call failed:', err)
   }
 }
 

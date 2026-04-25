@@ -332,38 +332,31 @@ export const DEMO_ACCOUNTS: Record<
 export async function signInDemo(role: Role): Promise<AuthResult> {
   const demo = DEMO_ACCOUNTS[role]
 
-  // First try a normal sign-in. If the account exists, we're done.
-  const signInResult = await signIn({
+  // Demo accounts are seeded one-time via supabase/seeds/demo-accounts.sql
+  // (see that file's header for why direct DB seed instead of signUp).
+  // Here we only sign in; we never attempt to create the account at
+  // runtime, which avoids Supabase's signup rate limit.
+  const result = await signIn({
     email: demo.email,
     password: DEMO_PASSWORD,
     role,
   })
-  if (signInResult.ok) return signInResult
+  if (result.ok) return result
 
-  // Treat both "wrong password" and "user not found" as "needs seeding".
-  // Then sign up — handle_new_user trigger will provision the profile.
-  const signUpResult = await signUp({
-    email: demo.email,
-    password: DEMO_PASSWORD,
-    full_name: demo.full_name,
-    role,
-  })
-  if (!signUpResult.ok) {
+  // Translate Supabase's terse error into something actionable.
+  const lower = (result.error ?? '').toLowerCase()
+  if (
+    lower.includes('invalid login') ||
+    lower.includes('not found') ||
+    lower.includes('credentials')
+  ) {
     return {
       ok: false,
       error:
-        'Could not seed the demo account: ' +
-        (signUpResult.error ?? 'unknown error'),
+        'Demo accounts have not been seeded yet. Open Supabase → SQL Editor and run the contents of supabase/seeds/demo-accounts.sql once, then click again.',
     }
   }
-  if (signUpResult.needsEmailConfirmation) {
-    return {
-      ok: false,
-      error:
-        'Demo accounts require email confirmation to be turned OFF in your Supabase project (Auth → Providers → Email → Confirm email).',
-    }
-  }
-  return signUpResult
+  return result
 }
 
 export function homeForRole(role: Role): string {

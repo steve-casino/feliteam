@@ -23,7 +23,7 @@ const ROLE_COOKIE = 'injuryflow_role'
 
 type Role = 'case_manager' | 'case_rep'
 
-const MANAGER_ROUTES = ['/dashboard', '/intake', '/cases', '/admin']
+const MANAGER_ROUTES = ['/dashboard', '/calendar', '/intake', '/cases', '/admin']
 const REP_ROUTES = ['/rep-intake']
 
 function parseRoleCookie(raw: string | undefined): Role | null {

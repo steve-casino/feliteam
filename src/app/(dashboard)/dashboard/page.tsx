@@ -8,7 +8,8 @@ import ProgressBar from '@/components/ui/ProgressBar'
 import XPDisplay from '@/components/ui/XPDisplay'
 import Badge from '@/components/ui/Badge'
 import Avatar from '@/components/ui/Avatar'
-import OpportunitiesFeed from '@/components/dashboard/OpportunitiesFeed'
+import IntakeMetrics from '@/components/dashboard/IntakeMetrics'
+import IntakesBoard from '@/components/dashboard/IntakesBoard'
 import { mockCases, mockUsers, mockChecklistItems } from '@/lib/mock-data'
 import { useTranslation } from '@/hooks/useLanguage'
 
@@ -160,8 +161,11 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Opportunities feed — submitted by Case Reps */}
-      <OpportunitiesFeed />
+      {/* Intake metrics — totals / rejected / wanted / signups */}
+      <IntakeMetrics />
+
+      {/* Intake status board — submitted by Case Reps */}
+      <IntakesBoard />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

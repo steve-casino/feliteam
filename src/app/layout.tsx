@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InjuryFlow | Law Firm Operations Platform",
-  description: "InjuryFlow - Your PI Firm, Gamified.",
+  title: "Felicetti Team",
+  description: "Felicetti Law Firm — internal operations.",
 };
 
 export default function RootLayout({

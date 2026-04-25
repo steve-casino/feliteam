@@ -296,6 +296,71 @@ export async function signOut(): Promise<void> {
   }
 }
 
+// ──────────────────────────────────────────────────────────────────
+// Demo accounts
+//
+// Two seeded accounts that the landing page exposes via "Try as demo"
+// buttons. Trying to log in to a non-existent demo account creates it
+// on the fly using `signUp`, then signs in. So whoever clicks the
+// button first effectively seeds the account for everyone else.
+//
+// These are real Supabase auth users — once seeded, they behave
+// identically to a self-signed-up account.
+// ──────────────────────────────────────────────────────────────────
+
+const DEMO_PASSWORD = 'FelicettiDemo2026!'
+
+export const DEMO_ACCOUNTS: Record<
+  Role,
+  { email: string; full_name: string }
+> = {
+  case_manager: {
+    email: 'demo.manager@felicetti.test',
+    full_name: 'Demo Manager',
+  },
+  case_rep: {
+    email: 'demo.rep@felicetti.test',
+    full_name: 'Demo Rep',
+  },
+}
+
+export async function signInDemo(role: Role): Promise<AuthResult> {
+  const demo = DEMO_ACCOUNTS[role]
+
+  // First try a normal sign-in. If the account exists, we're done.
+  const signInResult = await signIn({
+    email: demo.email,
+    password: DEMO_PASSWORD,
+    role,
+  })
+  if (signInResult.ok) return signInResult
+
+  // Treat both "wrong password" and "user not found" as "needs seeding".
+  // Then sign up — handle_new_user trigger will provision the profile.
+  const signUpResult = await signUp({
+    email: demo.email,
+    password: DEMO_PASSWORD,
+    full_name: demo.full_name,
+    role,
+  })
+  if (!signUpResult.ok) {
+    return {
+      ok: false,
+      error:
+        'Could not seed the demo account: ' +
+        (signUpResult.error ?? 'unknown error'),
+    }
+  }
+  if (signUpResult.needsEmailConfirmation) {
+    return {
+      ok: false,
+      error:
+        'Demo accounts require email confirmation to be turned OFF in your Supabase project (Auth → Providers → Email → Confirm email).',
+    }
+  }
+  return signUpResult
+}
+
 export function homeForRole(role: Role): string {
   return role === 'case_manager' ? '/dashboard' : '/rep-intake'
 }

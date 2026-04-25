@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
-  LogOut
+  LogOut,
+  Calendar as CalendarIcon
 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import { signOut } from '@/lib/auth'
@@ -50,6 +51,11 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard
+  },
+  {
+    label: 'Calendar',
+    href: '/calendar',
+    icon: CalendarIcon
   },
   {
     label: 'Intake',
@@ -117,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 })
             <div className="text-blue-400 text-xl">
               <Zap className="w-6 h-6" />
             </div>
-            <span className="text-lg font-bold text-blue-400">InjuryFlow</span>
+            <span className="text-lg font-bold text-blue-400">Felicetti Team</span>
           </div>
         )}
         {collapsed && <div className="text-blue-400"><Zap className="w-6 h-6" /></div>}

@@ -310,16 +310,21 @@ export async function signOut(): Promise<void> {
 
 const DEMO_PASSWORD = 'FelicettiDemo2026!'
 
+// NOTE on demo email domain: we use felicetti-team.app (a real,
+// non-reserved TLD) because Supabase's email validator rejects the
+// IETF-reserved TLDs `.test`, `.example`, `.invalid`, `.localhost`.
+// The address doesn't need to actually receive mail — Supabase only
+// validates format here, and the demo flow has email confirmation off.
 export const DEMO_ACCOUNTS: Record<
   Role,
   { email: string; full_name: string }
 > = {
   case_manager: {
-    email: 'demo.manager@felicetti.test',
+    email: 'demo.manager@felicetti-team.app',
     full_name: 'Demo Manager',
   },
   case_rep: {
-    email: 'demo.rep@felicetti.test',
+    email: 'demo.rep@felicetti-team.app',
     full_name: 'Demo Rep',
   },
 }

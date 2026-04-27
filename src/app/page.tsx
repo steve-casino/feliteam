@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   Zap,
   Shield,
@@ -14,6 +15,7 @@ import {
   Loader2,
   AlertCircle,
   PlayCircle,
+  Settings,
 } from 'lucide-react'
 import {
   homeForRole,
@@ -86,15 +88,36 @@ export default function LandingPage() {
     <div className="min-h-screen bg-navy relative overflow-hidden">
       <AmbientBackground />
 
-      {/* Brand */}
-      <header className="relative z-10 flex items-center justify-center pt-10 pb-2">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg shadow-lg shadow-blue-500/30">
-            <Zap className="w-5 h-5 text-white" />
+      {/* Brand row + Admin link */}
+      <header className="relative z-10 pt-6 px-6">
+        <div className="flex items-center justify-between max-w-6xl mx-auto">
+          {/* spacer to keep brand centered on wider screens */}
+          <div className="w-32 hidden sm:block" />
+          <div className="flex items-center gap-2 mx-auto sm:mx-0">
+            <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg shadow-lg shadow-blue-500/30">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-extrabold tracking-tight text-white">
+              Felicetti Team
+            </span>
           </div>
-          <span className="text-xl font-extrabold tracking-tight text-white">
-            Felicetti Team
-          </span>
+          <Link
+            href="/admin"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-coral-400/30 bg-coral-400/10 text-coral-400 text-xs font-bold tracking-wider uppercase hover:bg-coral-400/20 hover:border-coral-400/50 transition-colors"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            Admin
+          </Link>
+        </div>
+        {/* mobile-only admin pill */}
+        <div className="flex justify-center mt-3 sm:hidden">
+          <Link
+            href="/admin"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-coral-400/30 bg-coral-400/10 text-coral-400 text-xs font-bold tracking-wider uppercase"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            Admin
+          </Link>
         </div>
       </header>
 

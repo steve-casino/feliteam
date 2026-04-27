@@ -26,7 +26,10 @@ const ROLE_COOKIE = 'injuryflow_role'
 
 type Role = 'case_manager' | 'case_rep'
 
-const MANAGER_ROUTES = ['/dashboard', '/calendar', '/intake', '/cases', '/admin']
+// /admin is intentionally PUBLIC (accessed via the landing top-right
+// link), so it's not in this list. To re-gate it later, add '/admin'
+// back here AND remove the link from src/app/page.tsx.
+const MANAGER_ROUTES = ['/dashboard', '/calendar', '/intake', '/cases']
 const REP_ROUTES = ['/rep-intake']
 
 function parseRoleCookie(raw: string | undefined): Role | null {

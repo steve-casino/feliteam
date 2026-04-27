@@ -9,7 +9,6 @@ import {
   UserPlus,
   Users,
   Trophy,
-  Settings,
   Bell,
   ChevronLeft,
   ChevronRight,
@@ -76,11 +75,8 @@ const navItems: NavItem[] = [
     href: '/leaderboard',
     icon: Trophy,
   },
-  {
-    label: 'Admin',
-    href: '/admin',
-    icon: Settings,
-  },
+  // Admin lives outside the dashboard now — accessed from the landing
+  // page top-right link, not the sidebar.
 ]
 
 const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 }) => {

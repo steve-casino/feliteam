@@ -20,6 +20,7 @@ import { Plus, Edit2, Trash2, ToggleLeft } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Avatar from '@/components/ui/Avatar'
 import Modal from '@/components/ui/Modal'
+import AdminChatbox from '@/components/admin/AdminChatbox'
 import { mockCases, mockUsers } from '@/lib/mock-data'
 import { useTranslation } from '@/hooks/useLanguage'
 
@@ -248,6 +249,9 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="w-full space-y-6">
+      {/* AI chatbox — pinned to the top, before any panels */}
+      <AdminChatbox />
+
       <div className="space-y-4">
         <h1 className="text-4xl font-bold text-white">Admin Panel</h1>
         <p className="text-white/60">System management, analytics, and user administration</p>

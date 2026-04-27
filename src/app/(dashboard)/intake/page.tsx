@@ -1,12 +1,14 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslation } from '@/hooks/useLanguage'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import BodyDiagram from '@/components/intake/BodyDiagram'
 import CarDiagram from '@/components/intake/CarDiagram'
 import Link from 'next/link'
 import { mockUsers, addNewCase } from '@/lib/mock-data'
+import { useIntakeStore } from '@/lib/intakes'
 import {
   ChevronRight,
   ChevronLeft,
@@ -142,11 +144,24 @@ function todayStr() {
 
 const IntakePage: React.FC = () => {
   const { t, language } = useTranslation()
+  const searchParams = useSearchParams()
+  const fromIntakeId = searchParams?.get('from') ?? null
+
+  // Pull intakes from the store so we can pre-fill from a baby intake
+  // if the manager arrived here via "click an intake on the dashboard".
+  const intakes = useIntakeStore((s) => s.intakes)
+  const intakesHydrated = useIntakeStore((s) => s.hydrated)
+  const hydrateIntakes = useIntakeStore((s) => s.hydrate)
+  const sourceIntake = useMemo(
+    () => (fromIntakeId ? intakes.find((i) => i.id === fromIntakeId) ?? null : null),
+    [fromIntakeId, intakes]
+  )
 
   // Step
   const [currentStep, setCurrentStep] = useState(1)
   const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set())
   const [transitioning, setTransitioning] = useState(false)
+  const [prefilled, setPrefilled] = useState(false)
 
   // Form state
   const [personal, setPersonal] = useState<PersonalInfo>({
@@ -154,6 +169,30 @@ const IntakePage: React.FC = () => {
     email: '', dob: '', ssn: '', maritalStatus: '', spouseName: '',
     countryOfBirth: '', wasWorking: '', roleInAccident: '', hasOwnVehicle: '', passengers: '',
   })
+
+  // Make sure intakes are loaded before we try to look one up.
+  useEffect(() => {
+    if (fromIntakeId && !intakesHydrated) hydrateIntakes()
+  }, [fromIntakeId, intakesHydrated, hydrateIntakes])
+
+  // Pre-fill the personal-info section from the rep's baby intake.
+  // Only runs once, and only if the manager hasn't started typing.
+  useEffect(() => {
+    if (prefilled || !sourceIntake) return
+    setPersonal((prev) => ({
+      ...prev,
+      fullName: sourceIntake.full_name || prev.fullName,
+      currentAddress: sourceIntake.current_address ?? prev.currentAddress,
+      phone: sourceIntake.phone ?? prev.phone,
+      emergencyPhone: sourceIntake.emergency_phone ?? prev.emergencyPhone,
+      email: sourceIntake.email ?? prev.email,
+      dob: sourceIntake.dob ?? prev.dob,
+      ssn: sourceIntake.ssn_last4 ?? prev.ssn, // baby intake only stored last 4
+      maritalStatus: sourceIntake.marital_status ?? prev.maritalStatus,
+      countryOfBirth: sourceIntake.country_of_birth ?? prev.countryOfBirth,
+    }))
+    setPrefilled(true)
+  }, [prefilled, sourceIntake])
   const [accident, setAccident] = useState<AccidentInfo>({
     dateOfAccident: '', timeOfAccident: '', streetName: '', townOrCity: '',
     state: '', policeCalled: '', policeCameToLocation: '', respondingDepartment: '',
@@ -1266,6 +1305,26 @@ const IntakePage: React.FC = () => {
         <div className="md:hidden mb-4">
           <LanguageToggle />
         </div>
+
+        {/* Banner: form was pre-filled from a rep's baby intake */}
+        {sourceIntake && prefilled && (
+          <div className="mb-5 rounded-xl border border-coral-400/30 bg-coral-400/5 px-4 py-3 flex items-start gap-3">
+            <div className="p-1.5 rounded-md bg-coral-400/15 mt-0.5 flex-shrink-0">
+              <Sparkles className="w-4 h-4 text-coral-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold tracking-wider uppercase text-coral-400">
+                Continuing rep intake
+              </p>
+              <p className="text-sm text-white mt-0.5 leading-snug">
+                Personal info was pre-filled from{' '}
+                <span className="font-semibold">{sourceIntake.full_name}</span>
+                &apos;s baby intake. Fill out the rest of the form to complete
+                the case.
+              </p>
+            </div>
+          </div>
+        )}
 
         {renderStepIndicator()}
 

@@ -9,6 +9,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO, format } from 'date-fns'
 import {
   Inbox,
@@ -18,6 +19,7 @@ import {
   Calendar as CalendarIcon,
   ShieldCheck,
   ChevronDown,
+  ChevronRight,
   Filter,
   AlertCircle,
 } from 'lucide-react'
@@ -277,17 +279,40 @@ function DateRangeFilter({
 // ──────────────────────────────────────────────────────────────────
 
 function IntakeRow({ intake }: { intake: Intake }) {
+  const router = useRouter()
   const meta = STATUS_META[effectiveStatus(intake)]
+
+  const openInIntakeForm = () => {
+    router.push(`/intake?from=${encodeURIComponent(intake.id)}`)
+  }
+
+  // Note: the entire row is clickable. The StatusMenu (and its dropdown)
+  // calls stopPropagation so changing status doesn't also open the form.
   return (
-    <div className="rounded-xl border border-white/10 bg-navy/50 p-4 hover:border-blue-400/30 transition-colors">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={openInIntakeForm}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          openInIntakeForm()
+        }
+      }}
+      className="group relative rounded-xl border border-white/10 bg-navy/50 p-4 hover:border-blue-400/40 hover:bg-navy/80 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+    >
       <div className="flex items-start justify-between gap-4 mb-3">
-        <div>
-          <h3 className="text-base font-bold text-white leading-tight">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-bold text-white leading-tight flex items-center gap-2">
             {intake.full_name || 'Unnamed'}
+            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="text-[11px] text-white/50 mt-0.5">
             Submitted{' '}
             {formatDistanceToNow(parseISO(intake.created_at), { addSuffix: true })}
+            <span className="ml-2 text-blue-300/70">
+              · Click to open in intake form
+            </span>
           </p>
         </div>
         <StatusMenu intake={intake} />
@@ -385,7 +410,7 @@ function Empty({ label }: { label: string }) {
 // ──────────────────────────────────────────────────────────────────
 
 function StatusMenu({ intake }: { intake: Intake }) {
-  const { session } = useAuthStore()
+  const session = useAuthStore((s) => s.session)
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [scheduleAt, setScheduleAt] = useState(intake.scheduled_at?.slice(0, 16) ?? '')
@@ -411,8 +436,11 @@ function StatusMenu({ intake }: { intake: Intake }) {
     }
   }
 
+  // The whole IntakeRow is a clickable button. We stop click propagation
+  // here so changing status (or interacting with the schedule inputs)
+  // doesn't ALSO open the full intake form.
   return (
-    <div className="relative">
+    <div className="relative" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -425,6 +453,7 @@ function StatusMenu({ intake }: { intake: Intake }) {
         <div
           className="absolute right-0 mt-2 w-72 rounded-xl border border-white/10 bg-navy-50 shadow-2xl z-30 p-3 space-y-2"
           onMouseLeave={() => setOpen(false)}
+          onClick={(e) => e.stopPropagation()}
         >
           <p className="text-[10px] uppercase tracking-wider text-white/40 font-bold">
             Move to

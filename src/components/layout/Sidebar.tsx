@@ -39,54 +39,48 @@ type NavItem = {
   adminOnly?: boolean
 }
 
-// Sidebar order: Dashboard first (opportunities feed), then Intake, then
-// the temporarily-disabled sections grouped at the bottom.
+// Sidebar order — full set of Case Manager modules.
 //
-// `disabled: true` greys a section out and makes it unclickable. The route
-// itself is also redirected via middleware.ts so typing the URL still
-// lands on a working page. To re-enable a section, remove the flag here
-// AND drop the matching path from DISABLED_ROUTES in middleware.ts.
+// `disabled: true` greys a section out and makes it unclickable. To
+// hide a section again, set `disabled: true` on the item AND add the
+// matching path to DISABLED_ROUTES in middleware.ts so the URL is
+// also blocked.
 const navItems: NavItem[] = [
   {
     label: 'Dashboard',
     href: '/dashboard',
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
   },
   {
     label: 'Calendar',
     href: '/calendar',
-    icon: CalendarIcon
+    icon: CalendarIcon,
   },
   {
     label: 'Intake',
     href: '/intake',
-    icon: UserPlus
-  },
-  {
-    label: 'Admin',
-    href: '/admin',
-    icon: Settings,
-    adminOnly: true,
-    disabled: true
+    icon: UserPlus,
   },
   {
     label: 'Cases',
     href: '/cases',
     icon: Briefcase,
-    disabled: true
   },
   {
     label: 'Team',
     href: '/team',
     icon: Users,
-    disabled: true
   },
   {
     label: 'Leaderboard',
     href: '/leaderboard',
     icon: Trophy,
-    disabled: true
-  }
+  },
+  {
+    label: 'Admin',
+    href: '/admin',
+    icon: Settings,
+  },
 ]
 
 const Sidebar: React.FC<SidebarProps> = ({ currentUser, notificationCount = 0 }) => {

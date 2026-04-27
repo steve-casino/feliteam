@@ -17,7 +17,10 @@ import { NextResponse, type NextRequest } from 'next/server'
  * @supabase/ssr; we just mirror the role for fast gating.
  */
 
-const DISABLED_ROUTES = ['/cases', '/team', '/leaderboard', '/admin']
+// All previously-hidden routes are now live. Keep this list around so
+// future temporary disables (e.g. "we're refactoring Cases this week")
+// are a one-line change. Empty array = nothing is auto-redirected.
+const DISABLED_ROUTES: string[] = []
 
 const ROLE_COOKIE = 'injuryflow_role'
 

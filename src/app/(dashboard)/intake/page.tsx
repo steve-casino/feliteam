@@ -11,6 +11,8 @@ import { mockUsers } from '@/lib/mock-data'
 import { useIntakeStore, markSigned } from '@/lib/intakes'
 import { createCase } from '@/lib/cases'
 import { useAuthStore } from '@/lib/auth'
+import AttachmentDropzone from '@/components/intake/AttachmentDropzone'
+import { Paperclip } from 'lucide-react'
 import {
   ChevronRight,
   ChevronLeft,
@@ -1353,6 +1355,23 @@ const IntakePage: React.FC = () => {
                 the case.
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Attachments uploaded by the rep — read-only on this view */}
+        {sourceIntake && (
+          <div className="mb-5 rounded-xl border border-blue-400/20 bg-navy-50/60 px-4 py-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Paperclip className="w-4 h-4 text-blue-400" />
+              <p className="text-xs font-bold tracking-wider uppercase text-blue-400">
+                Rep attachments
+              </p>
+            </div>
+            <AttachmentDropzone
+              intakeId={sourceIntake.id}
+              uploaderId={null}
+              readOnly
+            />
           </div>
         )}
 

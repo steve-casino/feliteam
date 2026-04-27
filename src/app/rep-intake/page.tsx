@@ -24,6 +24,7 @@ import {
   Save,
   Trash2,
   FilePen,
+  Paperclip,
 } from 'lucide-react'
 import { signOut, useAuthStore } from '@/lib/auth'
 import {
@@ -33,6 +34,7 @@ import {
   useIntakeStore,
   type Intake,
 } from '@/lib/intakes'
+import AttachmentDropzone from '@/components/intake/AttachmentDropzone'
 
 const MARITAL_OPTIONS = ['Married', 'Single', 'Divorced', 'Never Married']
 
@@ -161,6 +163,25 @@ export default function RepIntakePage() {
     const result = await discardDraft(id)
     if (!result.ok) setActionError(result.error ?? 'Could not delete draft.')
     if (activeDraftId === id) resetForm()
+  }
+
+  // Used by the AttachmentDropzone: when the rep drops a file before
+  // there's a draft, we save one on the fly so the file has somewhere
+  // to attach to. Returns the resolved intake id (or null on failure).
+  const ensureDraftForAttachment = async (): Promise<string | null> => {
+    if (activeDraftId) return activeDraftId
+    if (!session) return null
+    const result = await saveDraft(
+      form as unknown as Record<string, unknown>,
+      session.id,
+      null
+    )
+    if (!result.ok) {
+      setActionError(result.error ?? 'Could not create a draft for the attachment.')
+      return null
+    }
+    setActiveDraftId(result.intake.id)
+    return result.intake.id
   }
 
   const handleSaveDraft = async () => {
@@ -400,6 +421,22 @@ export default function RepIntakePage() {
                   className={inputCls(false)}
                 />
               </Field>
+            </div>
+
+            {/* Attachments — photos / IDs / insurance docs / scans */}
+            <div className="pt-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Paperclip className="w-3.5 h-3.5 text-coral-400" />
+                <label className="text-xs font-bold tracking-wide text-white/70 uppercase">
+                  Attachments
+                </label>
+                <span className="text-[10px] text-white/40">(optional)</span>
+              </div>
+              <AttachmentDropzone
+                intakeId={activeDraftId}
+                uploaderId={session.id}
+                ensureIntakeId={ensureDraftForAttachment}
+              />
             </div>
 
             {(errors.size > 0 || actionError) && (

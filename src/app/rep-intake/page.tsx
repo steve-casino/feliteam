@@ -274,10 +274,11 @@ export default function RepIntakePage() {
               ◂ {activeDraftId ? 'RESUMING DRAFT' : 'NEW INTAKE'} ▸
             </p>
             <h1 className="text-3xl font-black text-white">Quick intake</h1>
-            <p className="text-sm text-white/50 mt-1">
+            <p className="text-sm text-white/50 mt-2 leading-relaxed">
               Capture the basics. A Case Manager will pick it up from the
-              dashboard. Use <span className="text-white">Save draft</span> if
-              the client can&apos;t finish right now.
+              dashboard. Use{' '}
+              <span className="text-white font-semibold">Save draft</span>{' '}
+              if the client can&apos;t finish right now.
             </p>
           </div>
 

@@ -345,10 +345,12 @@ export async function signOut(): Promise<void> {
   // without waiting on the network round-trip. Then call Supabase.
   useAuthStore.getState()._setSession(null)
   try {
-    // Lazy-import the intake store to avoid a circular dep — we only
-    // need it during sign-out to clear cached rows.
+    // Lazy-import the data stores to avoid circular deps — we only
+    // need them during sign-out to clear cached rows.
     const { useIntakeStore } = await import('@/lib/intakes')
     useIntakeStore.getState().reset()
+    const { useCasesStore } = await import('@/lib/cases')
+    useCasesStore.getState().reset()
   } catch {
     // ignore — reset is best-effort
   }

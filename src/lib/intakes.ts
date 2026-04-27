@@ -55,6 +55,9 @@ export interface Intake {
   created_at: string
   updated_at: string
   signed_at: string | null
+  // Set when the manager finishes the full intake form for this baby
+  // intake — links to the resulting cases.id row.
+  case_id: string | null
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -325,6 +328,34 @@ export async function discardDraft(id: string): Promise<{ ok: boolean; error?: s
     return { ok: true }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Delete failed' }
+  }
+}
+
+/**
+ * Mark a baby intake as Signed and link it to the Case it became.
+ * Called by the manager's full intake form on submit. The trigger on
+ * the intakes table populates `signed_at` automatically when status
+ * flips to 'signed'.
+ */
+export async function markSigned(
+  intakeId: string,
+  caseId: string,
+  managerId: string
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = getSupabase()
+    const { error } = await supabase
+      .from('intakes')
+      .update({
+        status: 'signed',
+        case_id: caseId,
+        reviewed_by_manager_id: managerId,
+      })
+      .eq('id', intakeId)
+    if (error) throw error
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Update failed' }
   }
 }
 

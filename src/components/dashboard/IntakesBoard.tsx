@@ -281,8 +281,13 @@ function DateRangeFilter({
 function IntakeRow({ intake }: { intake: Intake }) {
   const router = useRouter()
   const meta = STATUS_META[effectiveStatus(intake)]
+  const alreadySigned = Boolean(intake.case_id)
 
   const openInIntakeForm = () => {
+    if (alreadySigned && intake.case_id) {
+      router.push(`/cases/${intake.case_id}`)
+      return
+    }
     router.push(`/intake?from=${encodeURIComponent(intake.id)}`)
   }
 
@@ -311,7 +316,9 @@ function IntakeRow({ intake }: { intake: Intake }) {
             Submitted{' '}
             {formatDistanceToNow(parseISO(intake.created_at), { addSuffix: true })}
             <span className="ml-2 text-blue-300/70">
-              · Click to open in intake form
+              {alreadySigned
+                ? '· Click to view the signed case'
+                : '· Click to open in intake form'}
             </span>
           </p>
         </div>

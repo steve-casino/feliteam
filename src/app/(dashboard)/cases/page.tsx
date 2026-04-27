@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { mockCases, mockUsers } from '@/lib/mock-data'
+import { mockUsers } from '@/lib/mock-data'
+import { useCasesStore } from '@/lib/cases'
 import { Case } from '@/types'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -25,6 +26,21 @@ type ViewMode = 'grid' | 'list'
 type SortBy = 'case_number' | 'date' | 'stage' | 'urgency'
 
 const CasesPage: React.FC = () => {
+  // Cases live in Supabase now; the store hydrates on mount and stays
+  // fresh via Realtime. No more mockCases reads.
+  const supabaseCases = useCasesStore((s) => s.cases)
+  const casesHydrated = useCasesStore((s) => s.hydrated)
+  const casesLoading = useCasesStore((s) => s.loading)
+  const casesError = useCasesStore((s) => s.error)
+  const hydrateCases = useCasesStore((s) => s.hydrate)
+
+  useEffect(() => {
+    if (!casesHydrated) hydrateCases()
+  }, [casesHydrated, hydrateCases])
+
+  // Local alias used everywhere below — replaces the old `mockCases`.
+  const mockCases = supabaseCases
+
   // State
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [searchTerm, setSearchTerm] = useState('')
@@ -38,10 +54,11 @@ const CasesPage: React.FC = () => {
 
   const itemsPerPage = 12
 
-  // Get unique states and case managers
+  // Get unique states and case managers — these are now reactive
+  // because mockCases (= supabaseCases) updates via Realtime.
   const uniqueStates = useMemo(() => {
     return Array.from(new Set(mockCases.map((c) => c.state))).sort()
-  }, [])
+  }, [mockCases])
 
   const uniqueCaseManagers = useMemo(() => {
     const managers = mockCases
@@ -53,7 +70,7 @@ const CasesPage: React.FC = () => {
       .filter(Boolean)
 
     return Array.from(new Set(managers)).sort() as string[]
-  }, [])
+  }, [mockCases])
 
   // Helper: Check if treatment gap exists
   const hasTreatmentGap = (caseObj: Case): boolean => {
@@ -129,6 +146,7 @@ const CasesPage: React.FC = () => {
       return true
     })
   }, [
+    mockCases,
     searchTerm,
     stageFilter,
     stateFilter,
@@ -342,7 +360,9 @@ const CasesPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-white">Cases</h1>
           <p className="text-white/60 mt-1">
-            Showing {paginatedCases.length} of {sortedCases.length} cases
+            {casesLoading && !casesHydrated
+              ? 'Loading cases…'
+              : `Showing ${paginatedCases.length} of ${sortedCases.length} cases`}
           </p>
         </div>
         <Link href="/intake">
@@ -352,6 +372,13 @@ const CasesPage: React.FC = () => {
           </Button>
         </Link>
       </div>
+
+      {casesError && (
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>Couldn&apos;t load cases: {casesError}</span>
+        </div>
+      )}
 
       {/* Filter Bar */}
       <Card className="space-y-4">

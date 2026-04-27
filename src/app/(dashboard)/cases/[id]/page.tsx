@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { mockCases, mockUsers, mockCaseNotes } from '@/lib/mock-data'
-import { CaseStage } from '@/types'
+import { mockUsers, mockCaseNotes } from '@/lib/mock-data'
+import { useCasesStore } from '@/lib/cases'
+import { CaseStage, Case } from '@/types'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
@@ -31,8 +32,15 @@ const CaseDetailPage: React.FC = () => {
   const params = useParams()
 
   const caseId = params.id as string
-  const caseObj = mockCases.find((c) => c.id === caseId)
+  const cases = useCasesStore((s) => s.cases)
+  const casesHydrated = useCasesStore((s) => s.hydrated)
+  const hydrateCases = useCasesStore((s) => s.hydrate)
+  const caseObj: Case | undefined = cases.find((c) => c.id === caseId)
   const caseNotes = mockCaseNotes.filter((n) => n.case_id === caseId)
+
+  useEffect(() => {
+    if (!casesHydrated) hydrateCases()
+  }, [casesHydrated, hydrateCases])
 
   // State
   const [activeNoteTab, setActiveNoteTab] = useState<NoteTab>('notes')
@@ -52,7 +60,9 @@ const CaseDetailPage: React.FC = () => {
           </Button>
         </Link>
         <Card className="text-center py-12">
-          <p className="text-white/60">Case not found</p>
+          <p className="text-white/60">
+            {casesHydrated ? 'Case not found' : 'Loading case…'}
+          </p>
         </Card>
       </div>
     )

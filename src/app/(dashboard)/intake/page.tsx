@@ -1,14 +1,16 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from '@/hooks/useLanguage'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import BodyDiagram from '@/components/intake/BodyDiagram'
 import CarDiagram from '@/components/intake/CarDiagram'
 import Link from 'next/link'
-import { mockUsers, addNewCase } from '@/lib/mock-data'
-import { useIntakeStore } from '@/lib/intakes'
+import { mockUsers } from '@/lib/mock-data'
+import { useIntakeStore, markSigned } from '@/lib/intakes'
+import { createCase } from '@/lib/cases'
+import { useAuthStore } from '@/lib/auth'
 import {
   ChevronRight,
   ChevronLeft,
@@ -144,6 +146,7 @@ function todayStr() {
 
 const IntakePage: React.FC = () => {
   const { t, language } = useTranslation()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const fromIntakeId = searchParams?.get('from') ?? null
 
@@ -174,6 +177,15 @@ const IntakePage: React.FC = () => {
   useEffect(() => {
     if (fromIntakeId && !intakesHydrated) hydrateIntakes()
   }, [fromIntakeId, intakesHydrated, hydrateIntakes])
+
+  // Guard: if the manager somehow lands here from a baby intake that
+  // already has a case, route to the existing case instead of creating
+  // a duplicate.
+  useEffect(() => {
+    if (sourceIntake?.case_id) {
+      router.replace(`/cases/${sourceIntake.case_id}`)
+    }
+  }, [sourceIntake, router])
 
   // Pre-fill the personal-info section from the rep's baby intake.
   // Only runs once, and only if the manager hasn't started typing.
@@ -221,7 +233,10 @@ const IntakePage: React.FC = () => {
   const [otherVehicleDamage, setOtherVehicleDamage] = useState<string[]>([])
 
   // Submission
+  const session = useAuthStore((s) => s.session)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [generatedCaseNumber, setGeneratedCaseNumber] = useState('')
   const [generatedCaseId, setGeneratedCaseId] = useState('')
   const [assignedCaseManager, setAssignedCaseManager] = useState<(typeof mockUsers)[number] | null>(null)
@@ -326,20 +341,13 @@ const IntakePage: React.FC = () => {
 
   // ─── Submit ───
 
-  const generateCaseNumber = () => Math.floor(100000 + Math.random() * 900000).toString()
-
-  const getCaseManager = () => {
-    const cms = mockUsers.filter(u => u.role === 'case_manager')
-    // Least loaded = lowest XP as a proxy for fewest cases
-    return cms.length > 0 ? cms.reduce((a, b) => a.xp_points <= b.xp_points ? a : b) : mockUsers[0]
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    setSubmitError(null)
+
     try {
-      const newCaseNumber = generateCaseNumber()
-      const newCaseManager = getCaseManager()
-      const newCaseId = `case-${Date.now()}`
       const now = new Date().toISOString()
 
       // Build notes from form data
@@ -353,10 +361,18 @@ const IntakePage: React.FC = () => {
       if (review.referralCode) noteParts.push(`Referral code: ${review.referralCode}`)
       if (review.preparedBy) noteParts.push(`Prepared by: ${review.preparedBy}`)
 
-      // Build a full Case object from intake form data
-      const newCase = {
-        id: newCaseId,
-        case_number: newCaseNumber,
+      // The signed-in case manager is the assignee. Falls back to mock
+      // user 0 in the unlikely event there's no session (shouldn't happen
+      // because the route is gated, but be defensive).
+      const managerId = session?.id ?? mockUsers[0].id
+      const managerProfile =
+        mockUsers.find((u) => u.id === managerId) ??
+        mockUsers.find((u) => u.role === 'case_manager') ??
+        mockUsers[0]
+
+      // Build the cases-row payload. We DO NOT set case_number — the DB
+      // assigns IF-XXXXXX via the cases_case_number_seq sequence.
+      const payload = {
         client_name: personal.fullName || 'Unknown Client',
         client_phone: personal.phone || '',
         client_dob: personal.dob || '2000-01-01',
@@ -369,10 +385,12 @@ const IntakePage: React.FC = () => {
         opposing_party: otherVehicle.operator || otherVehicle.owner || undefined,
         police_report_number: accident.policeCaseNumber || undefined,
         stage: 'new_case' as const,
-        assigned_case_manager_id: newCaseManager.id,
+        assigned_case_manager_id: managerId,
         assigned_medical_manager_id: undefined,
         clinic_info: injury.hospitalName || undefined,
-        treatment_status: (injury.ambulanceTransported === 'yes' ? 'in_progress' : 'not_started') as 'in_progress' | 'not_started',
+        treatment_status: (injury.ambulanceTransported === 'yes' ? 'in_progress' : 'not_started') as
+          | 'in_progress'
+          | 'not_started',
         bi_lor_status: 'pending' as const,
         um_pip_lor_status: 'pending' as const,
         police_report_status: (accident.policeCaseNumber ? 'obtained' : 'pending') as 'obtained' | 'pending',
@@ -384,23 +402,35 @@ const IntakePage: React.FC = () => {
         has_insurance_warning: yourVehicle.isInsured === 'no',
         vehicle_impound_date: yourVehicle.wasTowed === 'yes' ? (accident.dateOfAccident || undefined) : undefined,
         notes: noteParts.length > 0 ? noteParts.join('. ') : undefined,
-        created_at: now,
-        updated_at: now,
       }
 
-      // Add the case to the cases list
-      addNewCase(newCase)
+      const result = await createCase(payload)
+      if (!result.ok) {
+        setSubmitError(result.error)
+        setSubmitting(false)
+        return
+      }
 
-      setGeneratedCaseNumber(newCaseNumber)
-      setGeneratedCaseId(newCaseId)
-      setAssignedCaseManager(newCaseManager)
+      const created = result.case
+
+      // If we arrived here from a baby intake, flip it to Signed and
+      // link the new case. Best-effort — don't block success on this.
+      if (sourceIntake && session?.id) {
+        const linkResult = await markSigned(sourceIntake.id, created.id, session.id)
+        if (!linkResult.ok) {
+          console.warn('[intake] could not flip source intake to signed:', linkResult.error)
+        }
+      }
+
+      setGeneratedCaseNumber(created.case_number)
+      setGeneratedCaseId(created.id)
+      setAssignedCaseManager(managerProfile)
       setShowSuccess(true)
     } catch (err) {
       console.error('Intake submission error:', err)
-      // Still show success screen even if case store fails
-      setGeneratedCaseNumber(generateCaseNumber())
-      setAssignedCaseManager(getCaseManager())
-      setShowSuccess(true)
+      setSubmitError(err instanceof Error ? err.message : 'Submission failed.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -1367,13 +1397,23 @@ const IntakePage: React.FC = () => {
               </button>
 
               {currentStep === 6 ? (
-                <button
-                  type="submit"
-                  className="flex items-center gap-2 px-8 py-2.5 bg-teal-400 hover:bg-teal-500 text-white font-semibold rounded-lg transition-all shadow-lg shadow-teal-400/20"
-                >
-                  <Sparkles className="w-5 h-5" />
-                  {L('Submit Case', 'Enviar Caso', language)}
-                </button>
+                <div className="flex flex-col items-end gap-2">
+                  {submitError && (
+                    <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded px-2 py-1 max-w-md text-right">
+                      {submitError}
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex items-center gap-2 px-8 py-2.5 bg-teal-400 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all shadow-lg shadow-teal-400/20"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    {submitting
+                      ? L('Submitting…', 'Enviando…', language)
+                      : L('Submit Case', 'Enviar Caso', language)}
+                  </button>
+                </div>
               ) : (
                 <button
                   type="button"

@@ -8,11 +8,16 @@
  * the partial form state is persisted to the `intakes` table with
  * is_draft=true. Rep's drafts show up in a list above the form and
  * can be resumed (loads the saved fields) or discarded.
+ *
+ * EN/ES toggle: header includes a LanguageToggle wired to the global
+ * useLanguageStore. All visible copy is driven by t.repIntake.* so
+ * Spanish-speaking clients can complete the form in Spanish.
  */
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
+import { es as esLocale } from 'date-fns/locale'
 import {
   LogOut,
   Zap,
@@ -35,8 +40,23 @@ import {
   type Intake,
 } from '@/lib/intakes'
 import AttachmentDropzone from '@/components/intake/AttachmentDropzone'
+import LanguageToggle from '@/components/ui/LanguageToggle'
+import { useTranslation } from '@/hooks/useLanguage'
+import type { translations } from '@/i18n/translations'
 
-const MARITAL_OPTIONS = ['Married', 'Single', 'Divorced', 'Never Married']
+type RepIntakeT = (typeof translations)['en']['repIntake']
+
+// Marital option keys map to t.repIntake.marital.* labels.
+// Stored value (English) stays stable for downstream consumers.
+const MARITAL_OPTIONS: Array<{
+  value: string
+  key: keyof RepIntakeT['marital']
+}> = [
+  { value: 'Married', key: 'married' },
+  { value: 'Single', key: 'single' },
+  { value: 'Divorced', key: 'divorced' },
+  { value: 'Never Married', key: 'neverMarried' },
+]
 
 interface FormState {
   fullName: string
@@ -64,6 +84,8 @@ const emptyForm: FormState = {
 
 export default function RepIntakePage() {
   const router = useRouter()
+  const { t, language } = useTranslation()
+  const tr = t.repIntake
   const session = useAuthStore((s) => s.session)
   const hydrated = useAuthStore((s) => s.hydrated)
   const hydrate = useAuthStore((s) => s.hydrate)
@@ -161,7 +183,7 @@ export default function RepIntakePage() {
   const handleDiscardDraft = async (id: string) => {
     setActionError(null)
     const result = await discardDraft(id)
-    if (!result.ok) setActionError(result.error ?? 'Could not delete draft.')
+    if (!result.ok) setActionError(result.error ?? tr.errors.deleteDraftFailed)
     if (activeDraftId === id) resetForm()
   }
 
@@ -177,7 +199,7 @@ export default function RepIntakePage() {
       null
     )
     if (!result.ok) {
-      setActionError(result.error ?? 'Could not create a draft for the attachment.')
+      setActionError(result.error ?? tr.errors.attachmentDraftFailed)
       return null
     }
     setActiveDraftId(result.intake.id)
@@ -195,7 +217,7 @@ export default function RepIntakePage() {
         activeDraftId
       )
       if (!result.ok) {
-        setActionError(result.error ?? 'Save failed.')
+        setActionError(result.error ?? tr.errors.saveFailed)
         return
       }
       setActiveDraftId(result.intake.id)
@@ -235,7 +257,7 @@ export default function RepIntakePage() {
         session.id
       )
       if (!result.ok) {
-        setActionError(result.error ?? 'Submit failed.')
+        setActionError(result.error ?? tr.errors.submitFailed)
         return
       }
       if (activeDraftId) {
@@ -264,20 +286,23 @@ export default function RepIntakePage() {
             </div>
             <div>
               <p className="text-sm font-extrabold text-white leading-tight">
-                Felicetti Team · Rep Intake
+                {tr.headerTitle}
               </p>
               <p className="text-[11px] text-white/50 leading-tight">
-                Logged in as {session.full_name}
+                {tr.loggedInAs.replace('{name}', session.full_name)}
               </p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Log out
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              {tr.logout}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -287,19 +312,26 @@ export default function RepIntakePage() {
           name={success.name}
           onNew={() => setSuccess(null)}
           onLogout={handleLogout}
+          tr={tr}
         />
       ) : (
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
           <div>
             <p className="text-xs font-bold tracking-[0.25em] text-coral-400 mb-1">
-              ◂ {activeDraftId ? 'RESUMING DRAFT' : 'NEW INTAKE'} ▸
+              ◂ {activeDraftId ? tr.resumingDraft : tr.newIntake} ▸
             </p>
-            <h1 className="text-3xl font-black text-white">Quick intake</h1>
+            <h1 className="text-3xl font-black text-white">{tr.pageTitle}</h1>
             <p className="text-sm text-white/50 mt-2 leading-relaxed">
-              Capture the basics. A Case Manager will pick it up from the
-              dashboard. Use{' '}
-              <span className="text-white font-semibold">Save draft</span>{' '}
-              if the client can&apos;t finish right now.
+              {tr.pageSubtitle.split('{saveDraft}').map((chunk, idx, arr) => (
+                <React.Fragment key={idx}>
+                  {chunk}
+                  {idx < arr.length - 1 && (
+                    <span className="text-white font-semibold">
+                      {tr.buttons.saveDraft}
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
             </p>
           </div>
 
@@ -310,6 +342,8 @@ export default function RepIntakePage() {
               activeId={activeDraftId}
               onResume={handleResume}
               onDiscard={handleDiscardDraft}
+              tr={tr}
+              language={language}
             />
           )}
 
@@ -318,62 +352,73 @@ export default function RepIntakePage() {
             className="bg-gradient-to-br from-navy-50 to-navy-100 rounded-2xl border border-coral-400/20 p-6 md:p-8 shadow-xl space-y-5"
           >
             <Field
-              label="Full Name"
+              label={tr.fields.fullName}
               required
               error={errors.has('fullName')}
+              requiredLabel={tr.errors.fieldRequired}
             >
               <input
                 type="text"
                 value={form.fullName}
                 onChange={(e) => update('fullName', e.target.value)}
-                placeholder="John Doe"
+                placeholder={tr.fields.fullNamePlaceholder}
                 className={inputCls(errors.has('fullName'))}
               />
             </Field>
 
-            <Field label="Current Address">
+            <Field label={tr.fields.currentAddress}>
               <input
                 type="text"
                 value={form.currentAddress}
                 onChange={(e) => update('currentAddress', e.target.value)}
-                placeholder="123 Main St, City, ST 00000"
+                placeholder={tr.fields.currentAddressPlaceholder}
                 className={inputCls(false)}
               />
             </Field>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label="Phone Number" required error={errors.has('phone')}>
+              <Field
+                label={tr.fields.phone}
+                required
+                error={errors.has('phone')}
+                requiredLabel={tr.errors.fieldRequired}
+              >
                 <input
                   type="tel"
                   value={form.phone}
                   onChange={(e) => update('phone', e.target.value)}
-                  placeholder="(512) 555-0100"
+                  placeholder={tr.fields.phonePlaceholder}
                   className={inputCls(errors.has('phone'))}
                 />
               </Field>
-              <Field label="Emergency Contact Phone">
+              <Field label={tr.fields.emergencyPhone}>
                 <input
                   type="tel"
                   value={form.emergencyPhone}
                   onChange={(e) => update('emergencyPhone', e.target.value)}
-                  placeholder="(512) 555-0200"
+                  placeholder={tr.fields.emergencyPhonePlaceholder}
                   className={inputCls(false)}
                 />
               </Field>
             </div>
 
-            <Field label="Email Address">
+            <Field label={tr.fields.email}>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => update('email', e.target.value)}
-                placeholder="client@email.com"
+                placeholder={tr.fields.emailPlaceholder}
                 className={inputCls(false)}
               />
             </Field>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label="Date of Birth" required error={errors.has('dob')}>
+              <Field
+                label={tr.fields.dob}
+                required
+                error={errors.has('dob')}
+                requiredLabel={tr.errors.fieldRequired}
+              >
                 <input
                   type="date"
                   value={form.dob}
@@ -381,43 +426,40 @@ export default function RepIntakePage() {
                   className={inputCls(errors.has('dob'))}
                 />
               </Field>
-              <Field
-                label="Social Security #"
-                helper="Only last 4 digits are shown"
-              >
+              <Field label={tr.fields.ssn} helper={tr.fields.ssnHelper}>
                 <input
                   type="text"
                   value={maskedSSN}
                   onFocus={(e) => (e.target.value = form.ssn)}
                   onBlur={(e) => (e.target.value = maskedSSN)}
                   onChange={(e) => handleSSN(e.target.value)}
-                  placeholder="***-**-0000"
+                  placeholder={tr.fields.ssnPlaceholder}
                   className={inputCls(false)}
                 />
               </Field>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label="Marital Status">
+              <Field label={tr.fields.maritalStatus}>
                 <select
                   value={form.maritalStatus}
                   onChange={(e) => update('maritalStatus', e.target.value)}
                   className={inputCls(false)}
                 >
-                  <option value="">Select...</option>
+                  <option value="">{tr.fields.select}</option>
                   {MARITAL_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
+                    <option key={opt.value} value={opt.value}>
+                      {tr.marital[opt.key]}
                     </option>
                   ))}
                 </select>
               </Field>
-              <Field label="Country of Birth">
+              <Field label={tr.fields.countryOfBirth}>
                 <input
                   type="text"
                   value={form.countryOfBirth}
                   onChange={(e) => update('countryOfBirth', e.target.value)}
-                  placeholder="USA"
+                  placeholder={tr.fields.countryOfBirthPlaceholder}
                   className={inputCls(false)}
                 />
               </Field>
@@ -428,9 +470,11 @@ export default function RepIntakePage() {
               <div className="flex items-center gap-2 mb-2">
                 <Paperclip className="w-3.5 h-3.5 text-coral-400" />
                 <label className="text-xs font-bold tracking-wide text-white/70 uppercase">
-                  Attachments
+                  {tr.attachments.label}
                 </label>
-                <span className="text-[10px] text-white/40">(optional)</span>
+                <span className="text-[10px] text-white/40">
+                  {tr.attachments.optional}
+                </span>
               </div>
               <AttachmentDropzone
                 intakeId={activeDraftId}
@@ -442,10 +486,7 @@ export default function RepIntakePage() {
             {(errors.size > 0 || actionError) && (
               <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
                 <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>
-                  {actionError ??
-                    'Please fill in the required fields marked with *.'}
-                </span>
+                <span>{actionError ?? tr.errors.requiredFields}</span>
               </div>
             )}
 
@@ -461,7 +502,7 @@ export default function RepIntakePage() {
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    {activeDraftId ? 'Update draft' : 'Save draft'}
+                    {activeDraftId ? tr.buttons.updateDraft : tr.buttons.saveDraft}
                   </>
                 )}
               </button>
@@ -476,7 +517,7 @@ export default function RepIntakePage() {
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    Submit intake
+                    {tr.buttons.submit}
                   </>
                 )}
               </button>
@@ -497,19 +538,28 @@ function DraftList({
   activeId,
   onResume,
   onDiscard,
+  tr,
+  language,
 }: {
   drafts: Intake[]
   activeId: string | null
   onResume: (d: Intake) => void
   onDiscard: (id: string) => void
+  tr: RepIntakeT
+  language: 'en' | 'es'
 }) {
+  const dfOpts =
+    language === 'es'
+      ? { addSuffix: true, locale: esLocale }
+      : { addSuffix: true }
+
   return (
     <section className="rounded-xl border border-white/10 bg-navy-50/60 p-4">
       <div className="flex items-center gap-2 mb-3">
         <FilePen className="w-4 h-4 text-coral-400" />
-        <h2 className="text-sm font-bold text-white">Your saved drafts</h2>
+        <h2 className="text-sm font-bold text-white">{tr.drafts.title}</h2>
         <span className="ml-auto text-[11px] text-white/40">
-          {drafts.length} pending
+          {tr.drafts.pending.replace('{count}', String(drafts.length))}
         </span>
       </div>
       <ul className="space-y-2">
@@ -524,22 +574,25 @@ function DraftList({
           >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">
-                {d.full_name || 'Untitled draft'}
+                {d.full_name || tr.drafts.untitled}
               </p>
               <p className="text-[11px] text-white/40">
-                Saved {formatDistanceToNow(parseISO(d.updated_at), { addSuffix: true })}
+                {tr.drafts.savedAgo.replace(
+                  '{time}',
+                  formatDistanceToNow(parseISO(d.updated_at), dfOpts)
+                )}
               </p>
             </div>
             <button
               onClick={() => onResume(d)}
               className="text-xs font-semibold px-2.5 py-1 rounded border border-coral-400/40 text-coral-300 hover:bg-coral-400/10 transition-colors"
             >
-              Resume
+              {tr.drafts.resume}
             </button>
             <button
               onClick={() => onDiscard(d.id)}
               className="p-1.5 rounded text-white/40 hover:text-red-300 hover:bg-red-500/10 transition-colors"
-              title="Discard draft"
+              title={tr.drafts.discard}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -558,11 +611,15 @@ function SuccessScreen({
   name,
   onNew,
   onLogout,
+  tr,
 }: {
   name: string
   onNew: () => void
   onLogout: () => void
+  tr: RepIntakeT
 }) {
+  // Body string contains "{name}" — split + bold the inserted name.
+  const bodyParts = tr.success.body.split('{name}')
   return (
     <main className="max-w-3xl mx-auto px-4 py-16">
       <div className="bg-gradient-to-br from-navy-50 to-navy-100 border border-teal-400/30 rounded-2xl p-10 text-center shadow-2xl">
@@ -575,12 +632,18 @@ function SuccessScreen({
           </div>
         </div>
         <p className="text-xs font-bold tracking-[0.3em] text-teal-400 mb-2">
-          ◂ INTAKE SUBMITTED ▸
+          ◂ {tr.success.eyebrow} ▸
         </p>
-        <h2 className="text-3xl font-black text-white mb-2">Sent to Ops.</h2>
+        <h2 className="text-3xl font-black text-white mb-2">{tr.success.title}</h2>
         <p className="text-white/60 max-w-md mx-auto">
-          <span className="text-white font-semibold">{name}</span> is now on the
-          Case Manager dashboard. They&apos;ll take it from here.
+          {bodyParts.map((chunk, idx, arr) => (
+            <React.Fragment key={idx}>
+              {chunk}
+              {idx < arr.length - 1 && (
+                <span className="text-white font-semibold">{name}</span>
+              )}
+            </React.Fragment>
+          ))}
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
@@ -588,13 +651,13 @@ function SuccessScreen({
             onClick={onNew}
             className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-coral-400 to-coral-500 hover:from-coral-500 hover:to-coral-400 text-white font-bold shadow-lg shadow-coral-400/30 transition-all"
           >
-            Submit another <ArrowRight className="w-4 h-4" />
+            {tr.success.another} <ArrowRight className="w-4 h-4" />
           </button>
           <button
             onClick={onLogout}
             className="px-6 py-3 rounded-lg border border-white/15 text-white/80 hover:text-white hover:bg-white/5 font-semibold transition-colors"
           >
-            Log out
+            {tr.logout}
           </button>
         </div>
       </div>
@@ -611,12 +674,14 @@ function Field({
   required,
   error,
   helper,
+  requiredLabel,
   children,
 }: {
   label: string
   required?: boolean
   error?: boolean
   helper?: string
+  requiredLabel?: string
   children: React.ReactNode
 }) {
   return (
@@ -630,7 +695,9 @@ function Field({
         <p className="text-[11px] text-white/40 mt-1">{helper}</p>
       )}
       {error && (
-        <p className="text-[11px] text-red-400 mt-1">This field is required.</p>
+        <p className="text-[11px] text-red-400 mt-1">
+          {requiredLabel ?? 'This field is required.'}
+        </p>
       )}
     </div>
   )

@@ -261,6 +261,75 @@ export const translations = {
       caseManager: 'Assigned Case Manager',
       language: 'Language Preference',
       optional: 'Optional'
+    },
+
+    // Rep Intake (the stripped-down 9-field "baby intake" form)
+    repIntake: {
+      headerTitle: 'Felicetti Team · Rep Intake',
+      loggedInAs: 'Logged in as {name}',
+      logout: 'Log out',
+      newIntake: 'NEW INTAKE',
+      resumingDraft: 'RESUMING DRAFT',
+      pageTitle: 'Quick intake',
+      pageSubtitle:
+        "Capture the basics. A Case Manager will pick it up from the dashboard. Use {saveDraft} if the client can't finish right now.",
+      drafts: {
+        title: 'Your saved drafts',
+        pending: '{count} pending',
+        untitled: 'Untitled draft',
+        savedAgo: 'Saved {time}',
+        resume: 'Resume',
+        discard: 'Discard draft'
+      },
+      fields: {
+        fullName: 'Full Name',
+        fullNamePlaceholder: 'John Doe',
+        currentAddress: 'Current Address',
+        currentAddressPlaceholder: '123 Main St, City, ST 00000',
+        phone: 'Phone Number',
+        phonePlaceholder: '(512) 555-0100',
+        emergencyPhone: 'Emergency Contact Phone',
+        emergencyPhonePlaceholder: '(512) 555-0200',
+        email: 'Email Address',
+        emailPlaceholder: 'client@email.com',
+        dob: 'Date of Birth',
+        ssn: 'Social Security #',
+        ssnHelper: 'Only last 4 digits are shown',
+        ssnPlaceholder: '***-**-0000',
+        maritalStatus: 'Marital Status',
+        select: 'Select...',
+        countryOfBirth: 'Country of Birth',
+        countryOfBirthPlaceholder: 'USA'
+      },
+      marital: {
+        married: 'Married',
+        single: 'Single',
+        divorced: 'Divorced',
+        neverMarried: 'Never Married'
+      },
+      attachments: {
+        label: 'Attachments',
+        optional: '(optional)'
+      },
+      buttons: {
+        saveDraft: 'Save draft',
+        updateDraft: 'Update draft',
+        submit: 'Submit intake'
+      },
+      errors: {
+        requiredFields: 'Please fill in the required fields marked with *.',
+        fieldRequired: 'This field is required.',
+        saveFailed: 'Save failed.',
+        submitFailed: 'Submit failed.',
+        deleteDraftFailed: 'Could not delete draft.',
+        attachmentDraftFailed: 'Could not create a draft for the attachment.'
+      },
+      success: {
+        eyebrow: 'INTAKE SUBMITTED',
+        title: 'Sent to Ops.',
+        body: "{name} is now on the Case Manager dashboard. They'll take it from here.",
+        another: 'Submit another'
+      }
     }
   },
 
@@ -526,6 +595,75 @@ export const translations = {
       caseManager: 'Gerente de Caso Asignado',
       language: 'Preferencia de Idioma',
       optional: 'Opcional'
+    },
+
+    // Rep Intake (formulario simplificado de 9 campos - "baby intake")
+    repIntake: {
+      headerTitle: 'Equipo Felicetti · Admisión del Representante',
+      loggedInAs: 'Sesión iniciada como {name}',
+      logout: 'Cerrar sesión',
+      newIntake: 'NUEVA ADMISIÓN',
+      resumingDraft: 'CONTINUANDO BORRADOR',
+      pageTitle: 'Admisión rápida',
+      pageSubtitle:
+        'Capture lo básico. Un Gerente de Caso lo retomará desde el panel. Use {saveDraft} si el cliente no puede terminar ahora.',
+      drafts: {
+        title: 'Sus borradores guardados',
+        pending: '{count} pendientes',
+        untitled: 'Borrador sin título',
+        savedAgo: 'Guardado {time}',
+        resume: 'Continuar',
+        discard: 'Descartar borrador'
+      },
+      fields: {
+        fullName: 'Nombre Completo',
+        fullNamePlaceholder: 'Juan Pérez',
+        currentAddress: 'Dirección Actual',
+        currentAddressPlaceholder: 'Calle 123, Ciudad, ST 00000',
+        phone: 'Número de Teléfono',
+        phonePlaceholder: '(512) 555-0100',
+        emergencyPhone: 'Teléfono de Contacto de Emergencia',
+        emergencyPhonePlaceholder: '(512) 555-0200',
+        email: 'Correo Electrónico',
+        emailPlaceholder: 'cliente@correo.com',
+        dob: 'Fecha de Nacimiento',
+        ssn: 'Seguro Social',
+        ssnHelper: 'Solo se muestran los últimos 4 dígitos',
+        ssnPlaceholder: '***-**-0000',
+        maritalStatus: 'Estado Civil',
+        select: 'Seleccionar...',
+        countryOfBirth: 'País de Nacimiento',
+        countryOfBirthPlaceholder: 'EE.UU.'
+      },
+      marital: {
+        married: 'Casado/a',
+        single: 'Soltero/a',
+        divorced: 'Divorciado/a',
+        neverMarried: 'Nunca Casado/a'
+      },
+      attachments: {
+        label: 'Archivos Adjuntos',
+        optional: '(opcional)'
+      },
+      buttons: {
+        saveDraft: 'Guardar borrador',
+        updateDraft: 'Actualizar borrador',
+        submit: 'Enviar admisión'
+      },
+      errors: {
+        requiredFields: 'Por favor complete los campos requeridos marcados con *.',
+        fieldRequired: 'Este campo es obligatorio.',
+        saveFailed: 'Error al guardar.',
+        submitFailed: 'Error al enviar.',
+        deleteDraftFailed: 'No se pudo eliminar el borrador.',
+        attachmentDraftFailed: 'No se pudo crear un borrador para el archivo adjunto.'
+      },
+      success: {
+        eyebrow: 'ADMISIÓN ENVIADA',
+        title: 'Enviada a Operaciones.',
+        body: '{name} ya está en el panel del Gerente de Caso. Ellos se encargarán desde aquí.',
+        another: 'Enviar otra'
+      }
     }
   }
 }
